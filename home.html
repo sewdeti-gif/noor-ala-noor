@@ -10,9 +10,23 @@
       font-family: Arial, sans-serif;
       text-align: center;
       margin: 0;
-      padding: 25px 15px;
+      padding: 20px 15px;
       background: #f8f5ed;
       color: #333;
+    }
+
+    .back {
+      display: block;
+      max-width: 500px;
+      margin: 0 auto 15px;
+      text-align: right;
+    }
+
+    .back a {
+      color: #806044;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 16px;
     }
 
     h1 {
@@ -53,7 +67,7 @@
       margin: 8px 0;
     }
 
-    a {
+    .surah a {
       color: #806044;
       text-decoration: none;
       font-weight: bold;
@@ -74,6 +88,10 @@
 </head>
 
 <body>
+
+  <div class="back">
+    <a href="javascript:history.back()">← رجوع</a>
+  </div>
 
   <h1>وردك القرآني</h1>
   <p class="subtitle">سورة بعد كل صلاة</p>
