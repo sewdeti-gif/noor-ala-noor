@@ -10,7 +10,38 @@
   <h1>نور على نور</h1>
 
   <p>بالقرآن نرتقي، وبالصلاة يطمئن القلب.</p>
-<a href="home.html"><button>ابدئي</button></a>
+
+  <a href="home.html">
+    <button>ابدئي</button>
+  </a>
+
+  <br><br>
+
+  <button onclick="enableNotifications()">
+    🔔 تفعيل التنبيهات
+  </button>
+
+  <p id="status"></p>
+
+  <script>
+    function enableNotifications() {
+      if (!("Notification" in window)) {
+        document.getElementById("status").textContent =
+          "هذا المتصفح لا يدعم التنبيهات.";
+        return;
+      }
+
+      Notification.requestPermission().then(function(permission) {
+        if (permission === "granted") {
+          document.getElementById("status").textContent =
+            "تم تفعيل التنبيهات بنجاح.";
+        } else {
+          document.getElementById("status").textContent =
+            "لم يتم السماح بالتنبيهات.";
+        }
+      });
+    }
+  </script>
 
 </body>
 </html>
