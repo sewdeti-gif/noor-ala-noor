@@ -26,7 +26,6 @@
     }
 
     h1 { color: #5b4636; }
-
     .riwaya { color: #806044; font-weight: bold; }
 
     .button {
@@ -49,13 +48,6 @@
       background: #f8f5ed;
       border-radius: 10px;
     }
-
-    iframe {
-      width: 100%;
-      min-height: 420px;
-      border: 0;
-      border-radius: 10px;
-    }
   </style>
 </head>
 
@@ -64,29 +56,20 @@
     <h1>سورة الفتح</h1>
     <p class="riwaya">رواية ورش عن نافع</p>
 
-    <h2>القراءة والاستماع</h2>
-    <p>يمكنك فتح نص السورة والاستماع إلى تلاوة الحصري برواية ورش من المصدرين أدناه.</p>
+    <p>
+      افتحي المصحف واستمعي إلى التلاوة مع متابعة الآيات.
+    </p>
 
     <a class="button"
        href="https://quranpedia.net/surah/4/48/text"
        target="_blank" rel="noopener">
-      📖 فتح نص سورة الفتح
-    </a>
-
-    <a class="button"
-       href="https://surahquran.com/mp3/Al-Hussary-warsh/48.html"
-       target="_blank" rel="noopener">
-      🎧 تلاوة الحصري برواية ورش
+      📖 المصحف والتلاوة
     </a>
 
     <p id="status" class="status">لم تُسجَّل القراءة بعد.</p>
 
     <button class="button done" onclick="markDone()">
       ✓ تمّت القراءة
-    </button>
-
-    <button class="button" onclick="resetDone()">
-      إلغاء علامة الإتمام
     </button>
 
     <p>
@@ -108,11 +91,6 @@
 
     function markDone() {
       localStorage.setItem(key, "yes");
-      showStatus();
-    }
-
-    function resetDone() {
-      localStorage.removeItem(key);
       showStatus();
     }
 
