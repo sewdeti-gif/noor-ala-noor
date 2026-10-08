@@ -73,6 +73,21 @@
       font-weight: bold;
     }
 
+    .done {
+      margin-top: 12px;
+      padding: 9px 22px;
+      border: none;
+      border-radius: 20px;
+      background: #806044;
+      color: white;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .done.completed {
+      background: #5f7d5f;
+    }
+
     .notifications {
       max-width: 500px;
       margin: 30px auto 10px;
@@ -105,6 +120,7 @@
         📖 قراءة سورة يس
       </a>
     </p>
+    <button class="done" onclick="markDone('fajr', this)">تم ✓</button>
   </div>
 
   <div class="surah">
@@ -115,6 +131,7 @@
         📖 قراءة سورة الفتح
       </a>
     </p>
+    <button class="done" onclick="markDone('dhuhr', this)">تم ✓</button>
   </div>
 
   <div class="surah">
@@ -125,6 +142,7 @@
         📖 قراءة سورة النبأ
       </a>
     </p>
+    <button class="done" onclick="markDone('asr', this)">تم ✓</button>
   </div>
 
   <div class="surah">
@@ -135,6 +153,7 @@
         📖 قراءة سورة الواقعة
       </a>
     </p>
+    <button class="done" onclick="markDone('maghrib', this)">تم ✓</button>
   </div>
 
   <div class="surah">
@@ -145,12 +164,23 @@
         📖 قراءة سورة الملك
       </a>
     </p>
+    <button class="done" onclick="markDone('isha', this)">تم ✓</button>
   </div>
 
   <div class="notifications">
     <p>🔔 <strong>تنبيهات الورد</strong></p>
     <p>ستذكّركِ بالتلاوة والاستماع في أوقاتها.</p>
   </div>
+
+  <script>
+    function markDone(prayer, button) {
+      const today = new Date().toISOString().split('T')[0];
+      localStorage.setItem('ward_' + prayer, today);
+
+      button.textContent = 'تم ✓';
+      button.classList.add('completed');
+    }
+  </script>
 
 </body>
 </html>
