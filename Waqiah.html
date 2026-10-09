@@ -1,0 +1,98 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>سورة الواقعة | نور على نور</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f8f5ed;
+      color: #333;
+      margin: 0;
+      padding: 20px 15px;
+      line-height: 2;
+      text-align: center;
+    }
+    h1 { color: #5b4636; }
+    .riwaya { color: #806044; font-weight: bold; }
+    .box {
+      max-width: 750px;
+      margin: 20px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 2px 8px #00000012;
+    }
+    #quran {
+      text-align: justify;
+      font-size: 23px;
+      line-height: 2.2;
+      white-space: pre-line;
+    }
+    audio { width: 100%; margin: 15px 0; }
+    button {
+      background: #806044;
+      color: white;
+      border: 0;
+      padding: 12px 20px;
+      margin: 8px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    a { color: #806044; }
+  </style>
+</head>
+<body>
+
+  <h1>سورة الواقعة</h1>
+  <p class="riwaya">رواية ورش عن نافع</p>
+  <p>بالقرآن نرتقي، وبالصلاة يطمئن القلب.</p>
+
+  <div class="box">
+    <h2>📖 نص السورة</h2>
+    <p id="status">جارٍ تحميل نص السورة...</p>
+    <div id="quran"></div>
+  </div>
+
+  <div class="box">
+    <h2>🎧 الاستماع إلى الشيخ الحصري</h2>
+    <audio controls preload="none">
+      <source src="https://cdn.mp3quran.net/audio/mahmoud-husary/r3/056.mp3" type="audio/mpeg">
+      متصفحك لا يدعم تشغيل الصوت.
+    </audio>
+    <p>قد يحتاج الصوت إلى مصدر صحيح متاح حتى يعمل.</p>
+  </div>
+
+  <button onclick="markDone()">تمّت القراءة ✓</button>
+  <p id="done"></p>
+  <p><a href="home.html">← العودة إلى الورد القرآني</a></p>
+
+  <script>
+    fetch("https://api.quranpedia.net/v1/mushafs/4/56")
+      .then(response => {
+        if (!response.ok) throw new Error("تعذّر تحميل النص");
+        return response.json();
+      })
+      .then(data => {
+        document.getElementById("quran").textContent =
+          JSON.stringify(data, null, 2);
+        document.getElementById("status").textContent =
+          "تم تحميل بيانات السورة، لكن تنسيق النص يعتمد على استجابة المصدر.";
+      })
+      .catch(() => {
+        document.getElementById("status").textContent =
+          "لم نتمكن من تحميل نص السورة من المصدر. يمكنك الرجوع والمحاولة لاحقًا.";
+      });
+
+    function markDone() {
+      localStorage.setItem("waqiah_reading_completed", "true");
+      document.getElementById("done").textContent =
+        "بارك الله فيكِ، تم تسجيل إتمام القراءة على هذا الجهاز.";
+    }
+  </script>
+
+</body>
+</html>
