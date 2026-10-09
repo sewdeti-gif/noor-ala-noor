@@ -6,7 +6,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>شوايل الآخرة</title>
 
-  <style>
+  <style> <!-- تنبيه نور على نور قبل الفجر -->
+<script>
+if ("Notification" in window && "serviceWorker" in navigator) {
+  Notification.requestPermission();
+}
+
+function tanbihQiyam() {
+  if ("Notification" in window &&
+      Notification.permission === "granted") {
+    new Notification("نور على نور", {
+      body: "﴿ وَالَّذِينَ يَبِيتُونَ لِرَبِّهِمْ سُجَّدًا وَقِيَامًا ﴾",
+      dir: "rtl",
+      lang: "ar"
+    });
+  }
+}
+</script>
     body {
       margin: 0;
       min-height: 100vh;
