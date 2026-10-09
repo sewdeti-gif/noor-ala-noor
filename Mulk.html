@@ -1,0 +1,110 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>سورة الملك | نور على نور</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f8f5ed;
+      color: #333;
+      margin: 0;
+      padding: 20px 15px;
+      line-height: 2.2;
+      text-align: center;
+    }
+    h1 { color: #5b4636; }
+    .riwaya { color: #806044; font-weight: bold; }
+    .box {
+      max-width: 750px;
+      margin: 20px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 2px 8px #00000012;
+    }
+    #quran {
+      text-align: justify;
+      font-size: 25px;
+      line-height: 2.3;
+    }
+    .ayah { margin: 0 3px; }
+    audio { width: 100%; margin: 15px 0; }
+    button {
+      background: #806044;
+      color: white;
+      border: 0;
+      padding: 12px 20px;
+      margin: 8px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    a { color: #806044; text-decoration: none; }
+  </style>
+</head>
+<body>
+
+  <h1>سورة الملك</h1>
+  <p class="riwaya">رواية ورش عن نافع</p>
+  <p>بالقرآن نرتقي، وبالصلاة يطمئن القلب.</p>
+
+  <div class="box">
+    <h2>📖 تلاوة سورة الملك</h2>
+    <p id="status">جارٍ تحميل الآيات...</p>
+    <div id="quran"></div>
+
+    <h2>🎧 الاستماع إلى التلاوة</h2>
+    <audio controls preload="none">
+      <source src="https://cdn.mp3quran.net/audio/mahmoud-husary/r3/067.mp3" type="audio/mpeg">
+      متصفحك لا يدعم تشغيل الصوت.
+    </audio>
+  </div>
+
+  <button onclick="markDone()">تمّت القراءة ✓</button>
+  <p id="done"></p>
+  <p><a href="home.html">← العودة إلى الورد القرآني</a></p>
+
+  <script>
+    fetch("https://api.quranpedia.net/v1/mushafs/4/67")
+      .then(response => {
+        if (!response.ok) throw new Error("تعذّر تحميل النص");
+        return response.json();
+      })
+      .then(data => {
+        const verses = Array.isArray(data) ? data : (data.data || data.verses || []);
+        const container = document.getElementById("quran");
+
+        if (!verses.length) throw new Error("لا توجد آيات في الاستجابة");
+
+        container.replaceChildren();
+
+        verses.forEach(verse => {
+          if (verse.text) {
+            const span = document.createElement("span");
+            span.className = "ayah";
+            span.textContent = verse.text + " ۝ ";
+            container.appendChild(span);
+          }
+        });
+
+        if (!container.textContent.trim()) throw new Error("لم يُعثر على نص الآيات");
+
+        document.getElementById("status").textContent = "بسم الله الرحمن الرحيم";
+      })
+      .catch(() => {
+        document.getElementById("status").textContent =
+          "تعذّر تحميل الآيات. تحققي من الاتصال بالمصدر.";
+      });
+
+    function markDone() {
+      localStorage.setItem("mulk_reading_completed", "true");
+      document.getElementById("done").textContent =
+        "بارك الله فيكِ، تم تسجيل إتمام القراءة على هذا الجهاز.";
+    }
+  </script>
+
+</body>
+</html>
