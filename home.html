@@ -8,9 +8,7 @@
   <title>نور على نور</title>
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -58,9 +56,7 @@
       font-weight: bold;
     }
 
-    .surah:active {
-      background: #e4f1e7;
-    }
+    .surah:active { background: #e4f1e7; }
 
     .reminders {
       max-width: 480px;
@@ -116,42 +112,38 @@
   <section class="reminders">
     <h2>التذكير بالصلاة والقرآن</h2>
 
-    <p>
-      جرّبي السماح للتطبيق بإرسال الإشعارات.
-    </p>
+    <p>جرّبي السماح للتطبيق بإرسال الإشعارات.</p>
 
     <button type="button" id="testButton">
       تجربة التنبيه الآن
     </button>
 
     <p id="status" role="status" aria-live="polite">
-      لم نختبر الإشعارات بعد.
+      اضغطي الزر لتجربة الإشعار.
     </p>
 
     <p>
-      تذكير الضحى: الساعة 8:40 صباحًا.<br>
+      تذكير الضحى: الساعة 8:50 صباحًا.<br>
       تذكير سورة الفتح: بعد صلاة الظهر.
     </p>
   </section>
 
-  <footer>
-    نور على نور — بالقرآن نرتقي
-  </footer>
+  <footer>نور على نور — بالقرآن نرتقي</footer>
 
   <script>
     const statusText = document.getElementById("status");
     const testButton = document.getElementById("testButton");
 
     testButton.addEventListener("click", async function () {
-      if (!("Notification" in window)) {
+      if (!window.isSecureContext) {
         statusText.textContent =
-          "المتصفح لا يدعم إشعارات هذا التطبيق.";
+          "افتحي التطبيق من رابط HTTPS في Chrome.";
         return;
       }
 
-      if (!window.isSecureContext) {
+      if (!("Notification" in window)) {
         statusText.textContent =
-          "افتحي التطبيق من رابط HTTPS في متصفح Chrome.";
+          "هذا المتصفح لا يدعم إشعارات المواقع بهذه الطريقة.";
         return;
       }
 
@@ -164,7 +156,7 @@
 
         if (permission !== "granted") {
           statusText.textContent =
-            "إذن الإشعارات غير مفعّل. تحققي من إعدادات الموقع في Chrome.";
+            "لم يمنح المتصفح إذن الإشعارات. تحققي من إعدادات الموقع.";
           return;
         }
 
@@ -173,10 +165,10 @@
         });
 
         statusText.textContent =
-          "تم إرسال طلب التنبيه. تحققي من إشعارات الهاتف.";
+          "تم طلب إرسال الإشعار. تحققي من إشعارات الهاتف.";
       } catch (error) {
         statusText.textContent =
-          "تعذّر إرسال التنبيه. جرّبي فتح الموقع مباشرة في Chrome.";
+          "تعذّر إرسال الإشعار بهذه الطريقة. يحتاج الأمر إلى فحص إضافي.";
       }
     });
   </script>
