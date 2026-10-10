@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>وردك القرآني</title>
+  <title>نور على نور - وردك القرآني</title>
 
   <style>
     body {
@@ -23,30 +23,16 @@
       text-align: right;
     }
 
-    .back a {
+    .back a, .surah a {
       color: #806044;
       text-decoration: none;
       font-weight: bold;
       font-size: 16px;
     }
 
-    h1 {
-      margin-bottom: 5px;
-      color: #5b4636;
-    }
-
-    .subtitle {
-      margin-bottom: 8px;
-      color: #777;
-      font-size: 17px;
-    }
-
-    .riwaya {
-      margin-bottom: 25px;
-      color: #806044;
-      font-weight: bold;
-      font-size: 16px;
-    }
+    h1 { color: #5b4636; margin-bottom: 5px; }
+    .subtitle { color: #777; font-size: 17px; }
+    .riwaya { color: #806044; font-weight: bold; }
 
     .surah {
       background: white;
@@ -63,87 +49,135 @@
       font-size: 22px;
     }
 
-    .surah p {
-      margin: 10px 0;
-    }
-
-    .surah a {
-      color: #806044;
-      text-decoration: none;
-      font-weight: bold;
-      font-size: 16px;
-    }
-
     .notifications {
       max-width: 500px;
       margin: 30px auto 10px;
-      padding: 15px;
+      padding: 18px;
       background: #eee8dc;
       border-radius: 15px;
     }
 
-    .notifications p {
-      margin: 5px 0;
+    button {
+      background: #176b43;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 13px 20px;
+      margin: 10px;
+      font-size: 17px;
+      cursor: pointer;
     }
   </style>
 </head>
 
 <body>
-
   <div class="back">
     <a href="index.html">← رجوع</a>
   </div>
 
-  <h1>وردك القرآني</h1>
+  <h1>﴿ نور على نور ﴾</h1>
   <p class="subtitle">سورة بعد كل صلاة</p>
   <p class="riwaya">رواية ورش عن نافع</p>
 
   <div class="surah">
-  
-<!-- الفجر -->
-<div class="surah">
-  <h2>الفجر</h2>
-  <p><a href="Yassin.html">📖 سورة يس</a></p>
-</div>
-
-<!-- الظهر -->
-<div class="surah">
-  <h2>الظهر</h2>
-  <p><a href="Feth.html">📖 سورة الفتح</a></p>
-</div>
-
-<!-- العصر -->
-<div class="surah">
-  <h2>العصر</h2>
-  <p><a href="Naba.html">📖 سورة النبأ</a></p>
-</div>
-
-<!-- المغرب -->
-    
-
-<div class="surah">
-  <h2>المغرب</h2>
-  <p><a href="Waqiah.html">📖 سورة الواقعة</a></p>
-</div>
-
-<!-- العشاء -->
-<div class="surah">
-  <h2>العشاء</h2>
-  <p><a href="Mulk.html">📖 سورة الملك</a></p>
-</div>
-
-
-
-
-
-  
-
-
-
-  <div class="notifications">
-    <p>🔔 <strong>تنبيهات الورد</strong></p>
-    <p>ستذكّركِ بالتلاوة والاستماع في أوقاتها.</p>
+    <h2>الفجر</h2>
+    <p><a href="Yassin.html">📖 سورة يس</a></p>
   </div>
 
+  <div class="surah">
+    <h2>الظهر</h2>
+    <p><a href="Feth.html">📖 سورة الفتح</a></p>
+  </div>
+
+  <div class="surah">
+    <h2>العصر</h2>
+    <p><a href="Naba.html">📖 سورة النبأ</a></p>
+  </div>
+
+  <div class="surah">
+    <h2>المغرب</h2>
+    <p><a href="Waqiah.html">📖 سورة الواقعة</a></p>
+  </div>
+
+  <div class="surah">
+    <h2>العشاء</h2>
+    <p><a href="Mulk.html">📖 سورة الملك</a></p>
+  </div>
+
+  <div class="notifications">
+    <p><strong>🔔 تنبيهات نور على نور</strong></p>
+    <p>دقائق مع القرآن، سكينة للقلب وزاد للآخرة.</p>
+    <p>موعد تجربة الضحى: الساعة 8:00 صباحًا.</p>
+    <button id="testButton" onclick="testNotification()">
+      جرّبي التنبيه الآن
+    </button>
+    <p id="status">اضغطي الزر للسماح بالإشعارات وتجربتها.</p>
+  </div>
+
+  <script>
+    let eightTimer;
+
+    function scheduleEightAM() {
+      clearTimeout(eightTimer);
+
+      if (!("Notification" in window) ||
+          Notification.permission !== "granted") {
+        return;
+      }
+
+      const now = new Date();
+      const next = new Date();
+      next.setHours(8, 0, 0, 0);
+
+      if (now >= next) {
+        next.setDate(next.getDate() + 1);
+      }
+
+      eightTimer = setTimeout(() => {
+        if (Notification.permission === "granted") {
+          new Notification("نور على نور", {
+            body: "حان وقت صلاة الضحى ☀️ دقائق مع الصلاة والذكر.",
+            dir: "rtl",
+            lang: "ar"
+          });
+        }
+        scheduleEightAM();
+      }, next.getTime() - now.getTime());
+    }
+
+    async function testNotification() {
+      const status = document.getElementById("status");
+
+      if (!("Notification" in window)) {
+        status.textContent =
+          "المتصفح لا يدعم الإشعارات في هذه الصفحة.";
+        return;
+      }
+
+      let permission = Notification.permission;
+
+      if (permission === "default") {
+        permission = await Notification.requestPermission();
+      }
+
+      if (permission !== "granted") {
+        status.textContent =
+          "لم يُسمح بالإشعارات. تحققي من إذن الإشعارات في المتصفح.";
+        return;
+      }
+
+      new Notification("نور على نور", {
+        body: "نجح اختبار التنبيه! حان وقت دقائق مع القرآن 📖",
+        dir: "rtl",
+        lang: "ar"
+      });
+
+      status.textContent =
+        "أرسلنا إشعار الاختبار. تحققي هل ظهر على هاتفك.";
+      scheduleEightAM();
+    }
+
+    scheduleEightAM();
+  </script>
 </body>
 </html>
