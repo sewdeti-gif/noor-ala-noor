@@ -4,43 +4,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>شوايل الآخرة</title>
+  <title>نور على نور</title>
 
-  <style> <!-- تنبيه نور على نور قبل الفجر -->
-<script>
-if ("Notification" in window && "serviceWorker" in navigator) {
-  Notification.requestPermission();
-}
-
-function tanbihQiyam() {
-  if ("Notification" in window &&
-      Notification.permission === "granted") {
-    new Notification("نور على نور", {
-      body: "﴿ وَالَّذِينَ يَبِيتُونَ لِرَبِّهِمْ سُجَّدًا وَقِيَامًا ﴾",
-      dir: "rtl",
-      lang: "ar"
-    });
-  }
-}
-</script><!-- تجربة تنبيه سورة الكهف بعد 10 دقائق -->
-<button onclick="setTimeout(() => {
-  if (Notification.permission === 'granted') {
-    new Notification('نور على نور', {
-      body: 'حان وقت قراءة سورة الكهف 📖',
-      dir: 'rtl',
-      lang: 'ar'
-    });
-  }
-}, 10 * 60 * 1000)">
-  تجربة تنبيه سورة الكهف بعد 10 دقائق
-</button>
-
-<script>
-if ('Notification' in window &&
-    Notification.permission === 'default') {
-  Notification.requestPermission();
-}
-</script>
+  <style>
     body {
       margin: 0;
       min-height: 100vh;
@@ -93,7 +59,7 @@ if ('Notification' in window &&
 </head>
 
 <body>
-<h1>﴿ نور على نور ﴾</h1>
+  <h1>﴿ نور على نور ﴾</h1>
 
   <img src="IMG-20261009-WA6551.jpg" alt="شعار التطبيق">
 
@@ -102,8 +68,7 @@ if ('Notification' in window &&
   <p>دقائق مع القرآن، سكينة للقلب وزاد للآخرة.</p>
 
   <a href="home.html">
-    <button>تفضّل ←</button>
+    <button>تفضّلي ←</button>
   </a>
-
 </body>
 </html>
