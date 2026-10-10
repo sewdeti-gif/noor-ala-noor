@@ -130,47 +130,67 @@
 
   <footer>نور على نور — بالقرآن نرتقي</footer>
 
-  <script>
-    const statusText = document.getElementById("status");
-    const testButton = document.getElementById("testButton");
+  
+<script>
+  const statusText = document.getElementById("status");
+  const testButton = document.getElementById("testButton");
 
-    testButton.addEventListener("click", async function () {
+  testButton.textContent = "اختبار التنبيه بعد 10 دقائق";
+
+  testButton.addEventListener("click", async function () {
+    testButton.disabled = true;
+
+    try {
       if (!window.isSecureContext) {
-        statusText.textContent =
-          "افتحي التطبيق من رابط HTTPS في Chrome.";
-        return;
+        throw new Error("افتحي الموقع عبر رابط HTTPS.");
       }
 
       if (!("Notification" in window)) {
-        statusText.textContent =
-          "هذا المتصفح لا يدعم إشعارات المواقع بهذه الطريقة.";
-        return;
+        throw new Error("المتصفح لا يدعم إشعارات المواقع.");
       }
 
-      try {
-        let permission = Notification.permission;
+      if (!("serviceWorker" in navigator)) {
+        throw new Error("المتصفح لا يدعم خدمة الإشعارات المطلوبة.");
+      }
 
-        if (permission === "default") {
-          permission = await Notification.requestPermission();
-        }
+      let permission = Notification.permission;
 
-        if (permission !== "granted") {
+      if (permission === "default") {
+        permission = await Notification.requestPermission();
+      }
+
+      if (permission !== "granted") {
+        throw new Error("إذن الإشعارات غير متاح.");
+      }
+
+      await navigator.serviceWorker.register("./sw.js");
+      const registration = await navigator.serviceWorker.ready;
+
+      statusText.textContent =
+        "تم ضبط الاختبار. انتظري عشر دقائق وأبقي الصفحة مفتوحة.";
+
+      window.setTimeout(async function () {
+        try {
+          await registration.showNotification("نور على نور", {
+            body: "دقائق مع القرآن، سكينة للقلب وزاد للآخرة."
+          });
+
           statusText.textContent =
-            "لم يمنح المتصفح إذن الإشعارات. تحققي من إعدادات الموقع.";
-          return;
+            "انتهت الدقائق العشر وطُلب إرسال تنبيه الاختبار.";
+        } catch (error) {
+          statusText.textContent =
+            "تعذر عرض التنبيه. راجعي دعم المتصفح للإشعارات.";
         }
 
-        new Notification("نور على نور", {
-          body: "دقائق مع القرآن، سكينة للقلب وزاد للآخرة."
-        });
+        testButton.disabled = false;
+      }, 10 * 60 * 1000);
 
-        statusText.textContent =
-          "تم طلب إرسال الإشعار. تحققي من إشعارات الهاتف.";
-      } catch (error) {
-        statusText.textContent =
-          "تعذّر إرسال الإشعار بهذه الطريقة. يحتاج الأمر إلى فحص إضافي.";
-      }
-    });
-  </script>
+    } catch (error) {
+      statusText.textContent = error.message;
+      testButton.disabled = false;
+    }
+  });
+</script>
+
 </body>
 </html>
