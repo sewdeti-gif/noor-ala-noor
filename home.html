@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -8,7 +7,9 @@
   <title>نور على نور</title>
 
   <style>
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
     body {
       margin: 0;
@@ -56,7 +57,9 @@
       font-weight: bold;
     }
 
-    .surah:active { background: #e4f1e7; }
+    .surah:active {
+      background: #e4f1e7;
+    }
 
     .reminders {
       max-width: 480px;
@@ -103,11 +106,25 @@
 
   <h2>وردكِ مع القرآن</h2>
 
-  <a class="surah" href="Yassin.html">بعد صلاة الفجر — سورة يس</a>
-  <a class="surah" href="Feth.html">بعد صلاة الظهر — سورة الفتح</a>
-  <a class="surah" href="Naba.html">بعد صلاة العصر — سورة النبأ</a>
-  <a class="surah" href="Waqiah.html">بعد صلاة المغرب — سورة الواقعة</a>
-  <a class="surah" href="Mulk.html">بعد صلاة العشاء — سورة الملك</a>
+  <a class="surah" href="Yassin.html">
+    بعد صلاة الفجر — سورة يس
+  </a>
+
+  <a class="surah" href="Feth.html">
+    بعد صلاة الظهر — سورة الفتح
+  </a>
+
+  <a class="surah" href="Naba.html">
+    بعد صلاة العصر — سورة النبأ
+  </a>
+
+  <a class="surah" href="Waqiah.html">
+    بعد صلاة المغرب — سورة الواقعة
+  </a>
+
+  <a class="surah" href="Mulk.html">
+    بعد صلاة العشاء — سورة الملك
+  </a>
 
   <section class="reminders">
     <h2>التذكير بالصلاة والقرآن</h2>
@@ -115,7 +132,7 @@
     <p>جرّبي السماح للتطبيق بإرسال الإشعارات.</p>
 
     <button type="button" id="testButton">
-      تجربة التنبيه الآن
+      اختبار التنبيه بعد دقيقتين
     </button>
 
     <p id="status" role="status" aria-live="polite">
@@ -123,74 +140,4 @@
     </p>
 
     <p>
-      تذكير الضحى: الساعة 8:50 صباحًا.<br>
-      تذكير سورة الفتح: بعد صلاة الظهر.
-    </p>
-  </section>
-
-  <footer>نور على نور — بالقرآن نرتقي</footer>
-
-  
-<script>
-  const statusText = document.getElementById("status");
-  const testButton = document.getElementById("testButton");
-
-  testButton.textContent = "اختبار التنبيه بعد 10 دقائق";
-
-  testButton.addEventListener("click", async function () {
-    testButton.disabled = true;
-
-    try {
-      if (!window.isSecureContext) {
-        throw new Error("افتحي الموقع عبر رابط HTTPS.");
-      }
-
-      if (!("Notification" in window)) {
-        throw new Error("المتصفح لا يدعم إشعارات المواقع.");
-      }
-
-      if (!("serviceWorker" in navigator)) {
-        throw new Error("المتصفح لا يدعم خدمة الإشعارات المطلوبة.");
-      }
-
-      let permission = Notification.permission;
-
-      if (permission === "default") {
-        permission = await Notification.requestPermission();
-      }
-
-      if (permission !== "granted") {
-        throw new Error("إذن الإشعارات غير متاح.");
-      }
-
-      await navigator.serviceWorker.register("./sw.js");
-      const registration = await navigator.serviceWorker.ready;
-
-      statusText.textContent =
-        "تم ضبط الاختبار. انتظري عشر دقائق وأبقي الصفحة مفتوحة.";
-
-      window.setTimeout(async function () {
-        try {
-          await registration.showNotification("نور على نور", {
-            body: "دقائق مع القرآن، سكينة للقلب وزاد للآخرة."
-          });
-
-          statusText.textContent =
-            "انتهت الدقائق العشر وطُلب إرسال تنبيه الاختبار.";
-        } catch (error) {
-          statusText.textContent =
-            "تعذر عرض التنبيه. راجعي دعم المتصفح للإشعارات.";
-        }
-
-        testButton.disabled = false;
-      }, 2 * 60 * 1000);
-
-    } catch (error) {
-      statusText.textContent = error.message;
-      testButton.disabled = false;
-    }
-  });
-</script>
-
-</body>
-</html>
+      تذكير الضحى: الساعة 8:50 صباحًا
