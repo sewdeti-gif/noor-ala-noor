@@ -1,156 +1,207 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-<head><script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.init({
-      appId: "e41737a2-7d31-4a24-8a49-cbfc4e75aff0",
-      safari_web_id: "web.onesignal.auto.641afdf7-f4bf-4e2a-9c3a-de381580c8ca",
-      notifyButton: {
-        enable: true,
-      },
-    });
-  });
-</script>
+<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#176b43">
+  <title>شوايل الآخرة</title>
+
   <link rel="manifest" href="./manifest.json">
-  <title>نور على نور</title>
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      padding: 20px;
-      font-family: Arial, sans-serif;
+      padding: 20px 14px;
       background: #f5f8f3;
-      color: #214632;
+      color: #183c2b;
+      font-family: Arial, sans-serif;
       text-align: center;
     }
 
-    header {
-      padding: 24px 12px;
-      background: #176b43;
-      color: white;
+    main {
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    header, section {
+      background: white;
+      border: 1px solid #dce9df;
       border-radius: 18px;
+      padding: 20px 15px;
+      margin-bottom: 16px;
+      box-shadow: 0 3px 12px #176b4310;
     }
 
     h1 {
-      margin: 0 0 12px;
-      font-size: 30px;
+      color: #176b43;
+      margin: 4px 0 12px;
+      font-size: 29px;
     }
 
     .slogan {
-      font-size: 18px;
-      line-height: 1.8;
+      line-height: 1.9;
+      color: #5b6f60;
       margin: 0;
     }
 
     h2 {
-      margin-top: 28px;
       color: #176b43;
+      font-size: 20px;
+      margin-top: 0;
     }
 
     .surah {
       display: block;
-      margin: 12px auto;
-      padding: 16px;
-      max-width: 420px;
-      border-radius: 12px;
-      background: white;
-      border: 1px solid #d5e5d8;
-      color: #176b43;
       text-decoration: none;
-      font-size: 19px;
-      font-weight: bold;
+      color: #176b43;
+      border: 1px solid #dce9df;
+      border-radius: 12px;
+      padding: 14px 10px;
+      margin: 10px 0;
+      background: #fbfdfb;
+      font-size: 17px;
     }
 
-    .surah:active {
-      background: #e4f1e7;
-    }
-
-    .reminders {
-      max-width: 480px;
-      margin: 28px auto;
-      padding: 20px;
-      background: white;
-      border-radius: 16px;
-      border: 1px solid #d5e5d8;
+    .surah:active, button:active {
+      transform: scale(.98);
     }
 
     button {
-      border: none;
-      border-radius: 10px;
-      padding: 14px 20px;
-      margin: 8px 0;
+      display: block;
+      width: 100%;
+      border: 0;
+      border-radius: 12px;
+      padding: 14px;
+      margin-top: 10px;
       background: #176b43;
       color: white;
-      font-size: 17px;
+      font-size: 16px;
       cursor: pointer;
-      width: 100%;
-      max-width: 320px;
+    }
+
+    .note {
+      font-size: 13px;
+      color: #637267;
+      line-height: 1.8;
     }
 
     #status {
+      min-height: 30px;
       line-height: 1.8;
+      color: #176b43;
       overflow-wrap: anywhere;
     }
-
-    footer {
-      margin-top: 28px;
-      color: #55715e;
-      font-size: 14px;
-    }
   </style>
+
+  <script
+    src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js"
+    defer>
+  </script>
+
+  <script>
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+
+    OneSignalDeferred.push(async function (OneSignal) {
+      try {
+        await OneSignal.init({
+          appId: "e41737a2-7d31-4a24-8a49-cbfc4e75aff0",
+          serviceWorkerPath: "/noor-ala-noor/OneSignalSDKWorker.js",
+          serviceWorkerParam: {
+            scope: "/noor-ala-noor/"
+          }
+        });
+
+        window.oneSignalReady = true;
+        document.getElementById("status").textContent =
+          "تم تحميل إعدادات خدمة التنبيهات. فعّلي الإذن من الزر أدناه.";
+      } catch (error) {
+        document.getElementById("status").textContent =
+          "تعذر تهيئة التنبيهات. تحققي من إعدادات الخدمة وملف العامل.";
+        console.error("OneSignal initialization error:", error);
+      }
+    });
+  </script>
 </head>
 
 <body>
-  <header>
-    <h1>نور على نور</h1>
-    <p class="slogan">
-      دقائق مع القرآن، سكينة للقلب وزاد للآخرة.
-    </p>
-  </header>
+  <main>
+    <header>
+      <h1>شوايل الآخرة</h1>
+      <p class="slogan">
+        دقائق مع القرآن، سكينة للقلب وزاد للآخرة.
+      </p>
+    </header>
 
-  <h2>وردكِ مع القرآن</h2>
+    <section>
+      <h2>وردك مع القرآن</h2>
 
-  <a class="surah" href="Yassin.html">
-    بعد صلاة الفجر — سورة يس
-  </a>
+      <a class="surah" href="./Yassin.html">
+        🌅 بعد الفجر — سورة يس
+      </a>
 
-  <a class="surah" href="Feth.html">
-    بعد صلاة الظهر — سورة الفتح
-  </a>
+      <a class="surah" href="./Feth.html">
+        ☀️ بعد الظهر — سورة الفتح
+      </a>
 
-  <a class="surah" href="Naba.html">
-    بعد صلاة العصر — سورة النبأ
-  </a>
+      <a class="surah" href="./Naba.html">
+        🌤️ بعد العصر — سورة النبأ
+      </a>
 
-  <a class="surah" href="Waqiah.html">
-    بعد صلاة المغرب — سورة الواقعة
-  </a>
+      <a class="surah" href="./Waqiah.html">
+        🌇 بعد المغرب — سورة الواقعة
+      </a>
 
-  <a class="surah" href="Mulk.html">
-    بعد صلاة العشاء — سورة الملك
-  </a>
+      <a class="surah" href="./Mulk.html">
+        🌙 بعد العشاء — سورة الملك
+      </a>
+    </section>
 
-  <section class="reminders">
-    <h2>التذكير بالصلاة والقرآن</h2>
+    <section>
+      <h2>التنبيهات القرآنية</h2>
 
-    <p>جرّبي السماح للتطبيق بإرسال الإشعارات.</p>
+      <p class="note">
+        اضغطي على الزر لطلب الإذن باستقبال التنبيهات على هاتفك.
+      </p>
 
-    <button type="button" id="testButton">
-      اختبار التنبيه بعد دقيقتين
-    </button>
+      <button id="enableNotifications">
+        تفعيل التنبيهات
+      </button>
 
-    <p id="status" role="status" aria-live="polite">
-      اضغطي الزر لتجربة الإشعار.
-    </p>
+      <p id="status" role="status" aria-live="polite">
+        جارٍ تحميل إعدادات التنبيهات...
+      </p>
 
-    <p>
-      تذكير الضحى: الساعة 8:50 صباحًا
+      <p class="note">
+        تفعيل الإذن وحده لا يعني أن التنبيهات اليومية قد جُدولت.
+        سنختبر وصول إشعار فعلي بعد التأكد من تسجيل الجهاز.
+      </p>
+    </section>
+  </main>
+
+  <script>
+    document.getElementById("enableNotifications")
+      .addEventListener("click", async function () {
+        const status = document.getElementById("status");
+
+        if (!window.oneSignalReady) {
+          status.textContent =
+            "انتظري حتى يكتمل تحميل إعدادات التنبيهات، ثم أعيدي المحاولة.";
+          return;
+        }
+
+        try {
+          await OneSignal.Notifications.requestPermission();
+          status.textContent =
+            "تم إرسال طلب الإذن. تحققي من إعدادات المتصفح ومن اشتراك الجهاز في لوحة OneSignal.";
+        } catch (error) {
+          status.textContent =
+            "لم يكتمل طلب الإذن. تحققي من أذونات الموقع في المتصفح.";
+          console.error("Notification permission error:", error);
+        }
+      });
+  </script>
+</body>
+</html>
