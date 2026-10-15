@@ -1,0 +1,19 @@
+
+name: Prayer Notifications
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check prayer notification schedule
+        run: |
+          echo "Prayer notification scheduler is running."
+          echo "Prayer times and OneSignal sending still need to be configured."
