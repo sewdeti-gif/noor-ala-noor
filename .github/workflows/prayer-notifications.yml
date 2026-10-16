@@ -2,8 +2,6 @@
 name: Prayer Notifications
 
 on:
-  schedule:
-    - cron: "*/5 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -13,7 +11,24 @@ jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
-      - name: Check prayer notification schedule
+      - name: Send OneSignal test notification
+        env:
+          ONESIGNAL_REST_API_KEY: ${{ secrets.ONESIGNAL_REST_API_KEY }}
+          ONESIGNAL_APP_ID: e41737a2-7d31-4a24-8a49-cbfc4e75aff0
         run: |
-          echo "Prayer notification scheduler is running."
-          echo "Prayer times and OneSignal sending still need to be configured."
+          if [ -z "$ONESIGNAL_REST_API_KEY" ]; then
+            echo "Missing ONESIGNAL_REST_API_KEY secret"
+            exit 1
+          fi
+
+          curl --fail-with-body --request POST \
+            --url "https://api.onesignal.com/notifications" \
+            --header "Authorization: Key $ONESIGNAL_REST_API_KEY" \
+            --header "Content-Type: application/json" \
+            --data '{
+              "app_id": "'"$ONESIGNAL_APP_ID"'",
+              "included_segments": ["Test Users"],
+              "headings": {"ar": "شوايل الآخرة"},
+              "contents": {"ar": "دقائق مع القرآن، سكينة للقلب وزاد للآخرة."},
+              "url": "https://sewdeti-gif.github.io/noor-ala-noor/home.html"
+            }'
