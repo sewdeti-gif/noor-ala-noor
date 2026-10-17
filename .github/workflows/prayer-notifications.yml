@@ -28,7 +28,8 @@ jobs:
             --data '{
               "app_id": "'"$ONESIGNAL_APP_ID"'",
               "included_segments": ["Test Users"],
-              "headings": {"ar": "شوايل الآخرة"},
-              "contents": {"ar": "دقائق مع القرآن، سكينة للقلب وزاد للآخرة."},
+              "headings": {"en": "Shawayil Al-Akhira", "ar": "شوايل الآخرة"},
+"contents": {"en": "A moment with Quran, peace for the heart.", "ar": "دقائق مع القرآن، سكينة للقلب وزاد للآخرة."},
+              
               "url": "https://sewdeti-gif.github.io/noor-ala-noor/home.html"
             }'
