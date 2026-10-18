@@ -2,204 +2,136 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#176b43">
-  <title>شوايل الآخرة</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#176b43">
+<title>شوايل الآخرة</title>
+<link rel="manifest" href="./manifest.json">
 
-  <link rel="manifest" href="./manifest.json">
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:20px 14px;background:#f5f8f3;color:#183c2b;font-family:Arial,sans-serif;text-align:center}
+main{max-width:520px;margin:auto}
+header,section{background:white;border:1px solid #dce9df;border-radius:18px;padding:20px 15px;margin-bottom:16px}
+h1,h2{color:#176b43}
+h1{font-size:29px}
+h2{font-size:20px}
+.slogan,.note{line-height:1.9;color:#5b6f60}
+.note{font-size:13px}
+.surah{display:block;text-decoration:none;color:#176b43;border:1px solid #dce9df;border-radius:12px;padding:14px 10px;margin:10px 0;background:#fbfdfb;font-size:17px}
+button,select{display:block;width:100%;border:1px solid #dce9df;border-radius:12px;padding:14px;margin-top:10px;font-size:16px}
+button{background:#176b43;color:white;border:0}
+#status{min-height:30px;line-height:1.8;overflow-wrap:anywhere;color:#176b43}
+</style>
 
-  <style>
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      padding: 20px 14px;
-      background: #f5f8f3;
-      color: #183c2b;
-      font-family: Arial, sans-serif;
-      text-align: center;
-    }
-
-    main {
-      max-width: 520px;
-      margin: 0 auto;
-    }
-
-    header, section {
-      background: white;
-      border: 1px solid #dce9df;
-      border-radius: 18px;
-      padding: 20px 15px;
-      margin-bottom: 16px;
-      box-shadow: 0 3px 12px #176b4310;
-    }
-
-    h1 {
-      color: #176b43;
-      margin: 4px 0 12px;
-      font-size: 29px;
-    }
-
-    .slogan {
-      line-height: 1.9;
-      color: #5b6f60;
-      margin: 0;
-    }
-
-    h2 {
-      color: #176b43;
-      font-size: 20px;
-      margin-top: 0;
-    }
-
-    .surah {
-      display: block;
-      text-decoration: none;
-      color: #176b43;
-      border: 1px solid #dce9df;
-      border-radius: 12px;
-      padding: 14px 10px;
-      margin: 10px 0;
-      background: #fbfdfb;
-      font-size: 17px;
-    }
-
-    .surah:active, button:active {
-      transform: scale(.98);
-    }
-
-    button {
-      display: block;
-      width: 100%;
-      border: 0;
-      border-radius: 12px;
-      padding: 14px;
-      margin-top: 10px;
-      background: #176b43;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    .note {
-      font-size: 13px;
-      color: #637267;
-      line-height: 1.8;
-    }
-
-    #status {
-      min-height: 30px;
-      line-height: 1.8;
-      color: #176b43;
-      overflow-wrap: anywhere;
-    }
-  </style>
-
-  <script
-    src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js"
-    defer>
-  </script>
-
-  <script>
-    window.OneSignalDeferred = window.OneSignalDeferred || [];
-
-    OneSignalDeferred.push(async function (OneSignal) {
-      try {
-        await OneSignal.init({
-          appId: "e41737a2-7d31-4a24-8a49-cbfc4e75aff0",
-          serviceWorkerPath: "/noor-ala-noor/OneSignalSDKWorker.js",
-          serviceWorkerParam: {
-            scope: "/noor-ala-noor/"
-          }
-        });
-
-        window.oneSignalReady = true;
-        document.getElementById("status").textContent =
-          "تم تحميل إعدادات خدمة التنبيهات. فعّلي الإذن من الزر أدناه.";
-      } catch (error) {
-        document.getElementById("status").textContent =
-          "تعذر تهيئة التنبيهات. تحققي من إعدادات الخدمة وملف العامل.";
-        console.error("OneSignal initialization error:", error);
-      }
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+window.OneSignalDeferred=window.OneSignalDeferred||[];
+OneSignalDeferred.push(async function(OneSignal){
+  try{
+    await OneSignal.init({
+      appId:"e41737a2-7d31-4a24-8a49-cbfc4e75aff0",
+      serviceWorkerPath:"/noor-ala-noor/OneSignalSDKWorker.js",
+      serviceWorkerParam:{scope:"/noor-ala-noor/"}
     });
-  </script>
+    window.oneSignalReady=true;
+    document.getElementById("status").textContent=
+      "تم تحميل إعدادات التنبيهات. اختاري مدينتك وفعّلي الإذن.";
+  }catch(error){
+    document.getElementById("status").textContent=
+      "تعذر تحميل إعدادات التنبيهات. تحققي من الاتصال وإعدادات الخدمة.";
+    console.error(error);
+  }
+});
+</script>
 </head>
 
 <body>
-  <main>
-    <header>
-      <h1>شوايل الآخرة</h1>
-      <p class="slogan">
-        دقائق مع القرآن، سكينة للقلب وزاد للآخرة.
-      </p>
-    </header>
+<main>
+<header>
+<h1>شوايل الآخرة</h1>
+<p class="slogan">دقائق مع القرآن، سكينة للقلب وزاد للآخرة.</p>
+</header>
 
-    <section>
-      <h2>وردك مع القرآن</h2>
+<section>
+<h2>وردك مع القرآن</h2>
+<a class="surah" href="./Yassin.html">🌅 بعد الفجر — سورة يس</a>
+<a class="surah" href="./Feth.html">☀️ بعد الظهر — سورة الفتح</a>
+<a class="surah" href="./Naba.html">🌤️ بعد العصر — سورة النبأ</a>
+<a class="surah" href="./Waqiah.html">🌇 بعد المغرب — سورة الواقعة</a>
+<a class="surah" href="./Mulk.html">🌙 بعد العشاء — سورة الملك</a>
+</section>
 
-      <a class="surah" href="./Yassin.html">
-        🌅 بعد الفجر — سورة يس
-      </a>
+<section>
+<h2>مدينة مواقيت الصلاة</h2>
+<p class="note">اختاري مدينتك يدويًا، دون استخدام الموقع الدقيق للهاتف.</p>
 
-      <a class="surah" href="./Feth.html">
-        ☀️ بعد الظهر — سورة الفتح
-      </a>
+<label for="city">المدينة</label>
+<select id="city">
+<option value="Nouakchott">نواكشوط</option>
+<option value="Nouadhibou">نواذيبو</option>
+<option value="Atar">أطار</option>
+<option value="Zouerate">الزويرات</option>
+<option value="Rosso">روصو</option>
+<option value="Kaedi">كيهيدي</option>
+<option value="Kiffa">كيفه</option>
+<option value="Nema">النعمة</option>
+<option value="Selibaby">سيلبابي</option>
+<option value="Aleg">ألاك</option>
+<option value="Tidjikja">تجكجة</option>
+<option value="Akjoujt">أكجوجت</option>
+</select>
 
-      <a class="surah" href="./Naba.html">
-        🌤️ بعد العصر — سورة النبأ
-      </a>
+<button id="saveCity">حفظ المدينة</button>
+<h2 style="margin-top:24px">التنبيهات القرآنية</h2>
+<button id="enableNotifications">تفعيل التنبيهات</button>
 
-      <a class="surah" href="./Waqiah.html">
-        🌇 بعد المغرب — سورة الواقعة
-      </a>
+<p id="status" role="status" aria-live="polite">جارٍ تحميل إعدادات التنبيهات...</p>
+<p class="note">سيُستكمل ربط اختيار المدينة بمواقيت الصلاة والجدولة التلقائية قبل اعتماد التنبيهات اليومية.</p>
+</section>
+</main>
 
-      <a class="surah" href="./Mulk.html">
-        🌙 بعد العشاء — سورة الملك
-      </a>
-    </section>
+<script>
+const citySelect=document.getElementById("city");
+const status=document.getElementById("status");
 
-    <section>
-      <h2>التنبيهات القرآنية</h2>
+const savedCity=localStorage.getItem("prayerCity");
+if(savedCity && [...citySelect.options].some(o=>o.value===savedCity)){
+  citySelect.value=savedCity;
+}
 
-      <p class="note">  
-      </p>
+document.getElementById("saveCity").addEventListener("click",async function(){
+  const city=citySelect.value;
+  localStorage.setItem("prayerCity",city);
 
-      <button id="enableNotifications">
-        تفعيل التنبيهات
-      </button>
+  if(!window.oneSignalReady){
+    status.textContent="حُفظت المدينة على هذا الجهاز. انتظري تحميل خدمة التنبيهات.";
+    return;
+  }
 
-      <p id="status" role="status" aria-live="polite">
-        جارٍ تحميل إعدادات التنبيهات...
-      </p>
+  try{
+    await OneSignal.User.addTag("city",city);
+    status.textContent="تم حفظ المدينة وإرسال اختيارها لخدمة التنبيهات.";
+  }catch(error){
+    status.textContent="حُفظت المدينة على الجهاز، لكن تعذر إرسالها للخدمة. أعيدي المحاولة.";
+    console.error(error);
+  }
+});
 
-      <p class="note">
-          
-      </p>
-    </section>
-  </main>
+document.getElementById("enableNotifications").addEventListener("click",async function(){
+  if(!window.oneSignalReady){
+    status.textContent="انتظري اكتمال تحميل التنبيهات ثم أعيدي المحاولة.";
+    return;
+  }
 
-  <script>
-    document.getElementById("enableNotifications")
-      .addEventListener("click", async function () {
-        const status = document.getElementById("status");
-
-        if (!window.oneSignalReady) {
-          status.textContent =
-            "انتظري حتى يكتمل تحميل إعدادات التنبيهات، ثم أعيدي المحاولة.";
-          return;
-        }
-
-        try {
-          await OneSignal.Notifications.requestPermission();
-          status.textContent =
-            "تم إرسال طلب الإذن. تحققي من إعدادات المتصفح ومن اشتراك الجهاز في لوحة OneSignal.";
-        } catch (error) {
-          status.textContent =
-            "لم يكتمل طلب الإذن. تحققي من أذونات الموقع في المتصفح.";
-          console.error("Notification permission error:", error);
-        }
-      });
-  </script>
+  try{
+    await OneSignal.Notifications.requestPermission();
+    status.textContent="تم طلب إذن التنبيهات. احفظي المدينة أيضًا.";
+  }catch(error){
+    status.textContent="تعذر طلب الإذن. تحققي من أذونات الموقع في المتصفح.";
+    console.error(error);
+  }
+});
+</script>
 </body>
 </html>
