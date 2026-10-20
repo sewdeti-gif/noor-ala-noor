@@ -1,0 +1,69 @@
+name: Test Prayer Schedule Dry Run
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-schedule:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install requirements
+        run: pip install -r requirements.txt
+
+      - name: Test prayer notification schedule
+        run: |
+          python3 - <<'PY'
+          from datetime import date, datetime
+          from prayer_scheduler import schedule_for_day
+
+          lat = 18.1138
+          lon = -15.9438
+          timezone = "Africa/Nouakchott"
+
+          test_days = [
+              (date(2026, 10, 20), 14),
+              (date(2026, 10, 23), 18),
+          ]
+
+          for day, expected in test_days:
+              events = schedule_for_day(
+                  day, lat, lon, timezone
+              )
+
+              print("Date:", day)
+              print("Notifications:", len(events))
+
+              assert len(events) == expected, (
+                  "Unexpected notification count"
+              )
+
+              ids = [event["id"] for event in events]
+              assert len(ids) == len(set(ids)), (
+                  "Duplicate notification IDs"
+              )
+
+              for event in events:
+                  datetime.fromisoformat(event["time"])
+                  print(
+                      event["time"],
+                      event["id"],
+                      event["message"]
+                  )
+
+              print("Schedule structure passed")
+
+          print("ALL TESTS PASSED")
+          print("No notifications were sent")
+          PY
