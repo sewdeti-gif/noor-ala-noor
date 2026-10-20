@@ -1,0 +1,91 @@
+name: Test OneSignal Subscriber Read
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-read:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check OneSignal subscriber access
+        env:
+          ONESIGNAL_REST_API_KEY: ${{ secrets.ONESIGNAL_REST_API_KEY }}
+          ONESIGNAL_APP_ID: e41737a2-7d31-4a24-8a49-cbfc4e75aff0
+        run: |
+          python3 - <<'PY'
+          import os
+          import json
+          import urllib.request
+          import urllib.error
+          from urllib.parse import urlencode
+
+          key = os.environ.get("ONESIGNAL_REST_API_KEY", "")
+          app_id = os.environ["ONESIGNAL_APP_ID"]
+
+          if not key:
+              raise SystemExit("Missing OneSignal API key")
+
+          query = urlencode({
+              "app_id": app_id,
+              "limit": 10,
+              "offset": 0
+          })
+
+          url = "https://api.onesignal.com/players?" + query
+
+          request = urllib.request.Request(
+              url,
+              headers={
+                  "Authorization": "Key " + key,
+                  "Accept": "application/json"
+              }
+          )
+
+          try:
+              with urllib.request.urlopen(
+                  request, timeout=25
+              ) as response:
+                  data = json.load(response)
+          except urllib.error.HTTPError as error:
+              print("HTTP status:", error.code)
+              raise SystemExit(
+                  "Subscriber read API failed"
+              )
+
+          players = data.get("players", [])
+
+          print("Subscriber API connection successful")
+          print("Returned records:", len(players))
+          print(
+              "Total records:",
+              data.get("total_count", "unknown")
+          )
+
+          for index, player in enumerate(players, 1):
+              tags = player.get("tags") or {}
+
+              if isinstance(tags, str):
+                  try:
+                      tags = json.loads(tags)
+                  except json.JSONDecodeError:
+                      tags = {}
+
+              required = (
+                  "prayer_lat",
+                  "prayer_lon",
+                  "prayer_timezone"
+              )
+
+              print(
+                  "Subscriber", index,
+                  "has location tags:",
+                  all(tag in tags for tag in required)
+              )
+
+          print("No notifications sent")
+          print("No private location values displayed")
+          PY
