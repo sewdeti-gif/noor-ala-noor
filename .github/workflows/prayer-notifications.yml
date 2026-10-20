@@ -3,6 +3,8 @@ name: Prayer Notifications
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "0 9 * * *"
 
 permissions:
   contents: read
@@ -10,50 +12,48 @@ permissions:
 jobs:
   notify:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Send OneSignal test notification
+      - name: Send OneSignal notification
         env:
           ONESIGNAL_REST_API_KEY: ${{ secrets.ONESIGNAL_REST_API_KEY }}
           ONESIGNAL_APP_ID: e41737a2-7d31-4a24-8a49-cbfc4e75aff0
+          EVENT_NAME: ${{ github.event_name }}
         run: |
           set -euo pipefail
 
           if [ -z "${ONESIGNAL_REST_API_KEY:-}" ]; then
-            echo "Missing ONESIGNAL_REST_API_KEY secret"
+            echo "Missing OneSignal API key"
             exit 1
           fi
 
-          response=$(curl --silent --show-error \
+          if [ "$EVENT_NAME" = "schedule" ]; then
+            MESSAGE="حان وقت صلاة الضحى. دقائق مع القرآن، سكينة للقلب وزاد للآخرة."
+            SEGMENT="Subscribed Users"
+          else
+            MESSAGE="تنبيه تجريبي من شوايل الآخرة."
+            SEGMENT="Test Users"
+          fi
+
+          export MESSAGE SEGMENT
+
+          python3 - <<'PY' > payload.json
+          import json, os
+
+          data = {
+              "app_id": os.environ["ONESIGNAL_APP_ID"],
+              "included_segments": [os.environ["SEGMENT"]],
+              "headings": {"en": "شوايل الآخرة"},
+              "contents": {"en": os.environ["MESSAGE"]},
+              "url": "https://sewdeti-gif.github.io/noor-ala-noor/"
+          }
+
+          print(json.dumps(data, ensure_ascii=False))
+          PY
+
+          curl --fail-with-body --show-error \
             --request POST \
             --url "https://api.onesignal.com/notifications" \
             --header "Authorization: Key $ONESIGNAL_REST_API_KEY" \
             --header "Content-Type: application/json" \
-            --write-out '\nHTTP_STATUS:%{http_code}' \
-            --data-binary @- <<EOF
-          {
-            "app_id": "$ONESIGNAL_APP_ID",
-            "included_segments": ["Test Users"],
-            "headings": {
-              "en": "شوايل الآخرة",
-              "ar": "شوايل الآخرة"
-            },
-            "contents": {
-              "en": "دقائق مع القرآن، سكينة للقلب وزاد للآخرة.",
-              "ar": "دقائق مع القرآن، سكينة للقلب وزاد للآخرة."
-            },
-            "url": "https://sewdeti-gif.github.io/noor-ala-noor/"
-          }
-          EOF
-          )
-
-          status="${response##*HTTP_STATUS:}"
-          body="${response%HTTP_STATUS:*}"
-
-          echo "OneSignal response:"
-          echo "$body"
-          echo "HTTP status: $status"
-
-          if [[ ! "$status" =~ ^2[0-9][0-9]$ ]]; then
-            echo "OneSignal request failed"
-            exit 1
-          fi
+            --data-binary @payload.json
