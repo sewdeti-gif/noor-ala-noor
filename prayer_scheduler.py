@@ -77,13 +77,10 @@ def schedule_for_day(day, lat, lon, timezone):
          "صلاة العشاء — سورة الملك"),
         ("isha_2", isha + timedelta(minutes=40),
          "ورد العشاء — سورة الملك"),
-        ("qiyam_1", midnight,
-         "تذكير بقيام الليل"),
-        ("qiyam_2", fajr - timedelta(minutes=45),
-         "تذكير بقيام الليل"),
-        ("duha_1", datetime(
-            day.year, day.month, day.day,
-            9, tzinfo=tz
+                ("qiyam_1", fajr - timedelta(minutes=30),
+         "قيام الليل — ﴿وَالَّذِينَ يَبِيتُونَ لِرَبِّهِمْ سُجَّدًا وَقِيَامًا﴾ [الفرقان: 64]"),
+        ("qiyam_2", fajr - timedelta(minutes=15),
+         "قيام الليل — ﴿تَتَجَافَىٰ جُنُوبُهُمْ عَنِ الْمَضَاجِعِ﴾ [السجدة: 16]"),
         ), "صلاة الضحى"),
         ("duha_2", dhuhr - timedelta(minutes=30),
          "تذكير بصلاة الضحى"),
