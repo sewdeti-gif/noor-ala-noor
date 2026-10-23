@@ -3,8 +3,6 @@ name: Prayer Notifications
 
 on:
   workflow_dispatch:
-  
-    
 
 permissions:
   contents: read
@@ -14,11 +12,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Send OneSignal notification
+      - name: Send last third night test
         env:
           ONESIGNAL_REST_API_KEY: ${{ secrets.ONESIGNAL_REST_API_KEY }}
           ONESIGNAL_APP_ID: e41737a2-7d31-4a24-8a49-cbfc4e75aff0
-          EVENT_NAME: ${{ github.event_name }}
         run: |
           set -euo pipefail
 
@@ -27,24 +24,19 @@ jobs:
             exit 1
           fi
 
-          if [ "$EVENT_NAME" = "schedule" ]; then
-            MESSAGE="حان وقت صلاة الضحى. دقائق مع القرآن، سكينة للقلب وزاد للآخرة."
-            SEGMENT="Subscribed Users"
-          else
-            MESSAGE="تنبيه تجريبي من شوايل الآخرة."
-            SEGMENT="Test Users"
-          fi
-
-          export MESSAGE SEGMENT
-
           python3 - <<'PY' > payload.json
-          import json, os
+          import json
+          import os
 
           data = {
               "app_id": os.environ["ONESIGNAL_APP_ID"],
-              "included_segments": [os.environ["SEGMENT"]],
-              "headings": {"en": "شوايل الآخرة"},
-              "contents": {"en": os.environ["MESSAGE"]},
+              "included_segments": ["Test Users"],
+              "headings": {
+                  "en": "🌙 قيام الليل | شوايل الآخرة"
+              },
+              "contents": {
+                  "en": "🌙 دخل الثلث الأخير من الليل، وقت الدعاء والاستغفار والقيام. فلا تحرم نفسك من بركة هذا الوقت المبارك."
+              },
               "url": "https://sewdeti-gif.github.io/noor-ala-noor/"
           }
 
