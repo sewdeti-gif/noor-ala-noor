@@ -73,6 +73,17 @@ def schedule_for_day(day, lat, lon, timezone):
         ("isha_2", isha + timedelta(minutes=40),
          "ورد العشاء — سورة الملك"),
 
+        ("qiyam_last_third",
+         fajr - (
+             fajr - sun(
+                 observer,
+                 date=day - timedelta(days=1),
+                 tzinfo=tz
+             )["sunset"]
+         ) / 3,
+         "🌙 دخل الثلث الأخير من الليل، وقت الدعاء والاستغفار والقيام. فلا تحرم نفسك من بركة هذا الوقت المبارك."),
+
+
         ("qiyam_1", fajr - timedelta(minutes=30),
          "قيام الليل — ﴿وَالَّذِينَ يَبِيتُونَ لِرَبِّهِمْ سُجَّدًا وَقِيَامًا﴾ [الفرقان: 64]"),
 
