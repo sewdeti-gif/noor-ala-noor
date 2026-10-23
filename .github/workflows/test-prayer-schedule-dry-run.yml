@@ -1,3 +1,4 @@
+
 name: Test Prayer Schedule Dry Run
 
 on:
@@ -32,11 +33,10 @@ jobs:
           lon = -15.9438
           timezone = "Africa/Nouakchott"
 
-t          test_days = [
+          test_days = [
               (date(2026, 10, 20), 15),
               (date(2026, 10, 23), 19),
           ]
-
 
           for day, expected in test_days:
               events = schedule_for_day(
