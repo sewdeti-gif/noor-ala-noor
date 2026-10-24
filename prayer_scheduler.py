@@ -1,5 +1,9 @@
 
-"""جدولة تنبيهات شوايل الآخرة حسب الموقع والتوقيت المحلي."""
+"""جدولة تنبيهات شوايل الآخرة حسب الموقع والتوقيت المحلي.
+
+15 تنبيهًا في الأيام العادية، و19 تنبيهًا يوم الجمعة.
+المواقيت حسابية وتحتاج المقارنة بالتقويم المحلي قبل النشر.
+"""
 
 import argparse
 import json
@@ -89,6 +93,9 @@ def schedule_for_day(day, lat, lon, timezone):
         ("isha_2", isha + timedelta(minutes=40),
          "تذكير بسورة الملك"),
 
+        ("qiyam_last_third", last_third,
+         "دخل الثلث الأخير من الليل، وقت الدعاء والاستغفار والقيام"),
+
         ("qiyam_1", fajr - timedelta(minutes=30),
          "قيام الليل — الفرقان، الآيات 64 إلى 66، بصوت الشيخ الزين محمد أحمد"),
 
@@ -123,7 +130,7 @@ def schedule_for_day(day, lat, lon, timezone):
              "الجمعة — اغتنم الساعة الأخيرة بالدعاء"),
         ])
 
-    return [
+    result = [
         {
             "id": key,
             "time": when.isoformat(),
@@ -133,6 +140,13 @@ def schedule_for_day(day, lat, lon, timezone):
             events, key=lambda item: item[1]
         )
     ]
+
+    expected = 19 if day.weekday() == 4 else 15
+    assert len(result) == expected, (
+        f"Expected {expected} notifications, got {len(result)}"
+    )
+
+    return result
 
 
 if __name__ == "__main__":
