@@ -4,50 +4,166 @@ name: Prayer Notifications
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 12 * * *"
+    - cron: "10 0 * * *"
 
 permissions:
   contents: read
+
+concurrency:
+  group: prayer-notifications
+  cancel-in-progress: false
 
 jobs:
   notify:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Send daily test notification
+      - name: Download repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install requirements
+        run: pip install -r requirements.txt
+
+      - name: Schedule prayer reminders for test users
         env:
           ONESIGNAL_REST_API_KEY: ${{ secrets.ONESIGNAL_REST_API_KEY }}
           ONESIGNAL_APP_ID: e41737a2-7d31-4a24-8a49-cbfc4e75aff0
         run: |
-          set -euo pipefail
-
-          if [ -z "${ONESIGNAL_REST_API_KEY:-}" ]; then
-            echo "Missing OneSignal API key"
-            exit 1
-          fi
-
-          python3 - <<'PY' > payload.json
+          python3 - <<'PY'
           import json
           import os
+          import uuid
+          import urllib.request
+          import urllib.error
+          from datetime import datetime, timezone
+          from zoneinfo import ZoneInfo
+          from prayer_scheduler import schedule_for_day
 
-          data = {
-              "app_id": os.environ["ONESIGNAL_APP_ID"],
-              "included_segments": ["Test Users"],
-              "headings": {
-                  "en": "🌿 شوايل الآخرة"
-              },
-              "contents": {
-                  "en": "دقائق مع القرآن، سكينة للقلب وزاد للآخرة."
-              },
-              "url": "https://sewdeti-gif.github.io/noor-ala-noor/"
+          key = os.environ.get("ONESIGNAL_REST_API_KEY")
+          app_id = os.environ.get("ONESIGNAL_APP_ID")
+
+          if not key or not app_id:
+              raise RuntimeError("Missing OneSignal credentials")
+
+          local_tz = ZoneInfo("Africa/Nouakchott")
+          now = datetime.now(timezone.utc)
+          today = now.astimezone(local_tz).date()
+
+          events = schedule_for_day(
+              today,
+              18.1138,
+              -15.9438,
+              "Africa/Nouakchott"
+          )
+
+          expected = 19 if today.weekday() == 4 else 15
+          assert len(events) == expected
+
+          base_url = (
+              "https://sewdeti-gif.github.io/"
+              "noor-ala-noor/"
+          )
+
+          surah_pages = {
+              "fajr": "Yassin.html",
+              "dhuhr": "Feth.html",
+              "asr": "Naba.html",
+              "maghrib": "Waqiah.html",
+              "isha": "Mulk.html",
           }
 
-          print(json.dumps(data, ensure_ascii=False))
-          PY
+          scheduled = 0
+          skipped = 0
 
-          curl --fail-with-body --show-error \
-            --request POST \
-            --url "https://api.onesignal.com/notifications" \
-            --header "Authorization: Key $ONESIGNAL_REST_API_KEY" \
-            --header "Content-Type: application/json" \
-            --data-binary @payload.json
+          for event in events:
+              when = datetime.fromisoformat(event["time"])
+              send_time = when.astimezone(timezone.utc)
+
+              if send_time <= now:
+                  skipped += 1
+                  continue
+
+              event_id = event["id"]
+              page = next(
+                  (
+                      filename
+                      for prefix, filename in surah_pages.items()
+                      if event_id.startswith(prefix + "_")
+                  ),
+                  None
+              )
+
+              unique_id = str(uuid.uuid5(
+                  uuid.NAMESPACE_URL,
+                  f"shawayil:{today}:{event_id}:nouakchott"
+              ))
+
+              payload = {
+                  "app_id": app_id,
+                  "target_channel": "push",
+                  "included_segments": ["Test Users"],
+                  "headings": {
+                      "en": "🌿 شوايل الآخرة"
+                  },
+                  "contents": {
+                      "en": event["message"]
+                  },
+                  "url": base_url + page if page else base_url,
+                  "send_after": send_time.strftime(
+                      "%Y-%m-%d %H:%M:%S GMT"
+                  ),
+                  "idempotency_key": unique_id,
+                  "name": f"{today} {event_id}"
+              }
+
+              request = urllib.request.Request(
+                  "https://api.onesignal.com/notifications",
+                  data=json.dumps(
+                      payload,
+                      ensure_ascii=False
+                  ).encode("utf-8"),
+                  headers={
+                      "Authorization": "Key " + key,
+                      "Content-Type": "application/json"
+                  },
+                  method="POST"
+              )
+
+              try:
+                  with urllib.request.urlopen(
+                      request, timeout=30
+                  ) as response:
+                      result = json.load(response)
+                      if result.get("errors"):
+                          raise RuntimeError(
+                              str(result["errors"])
+                          )
+                      if not result.get("id"):
+                          raise RuntimeError(
+                              "No notification ID returned"
+                          )
+              except urllib.error.HTTPError as error:
+                  details = error.read().decode(
+                      "utf-8", errors="replace"
+                  )
+                  raise RuntimeError(
+                      f"OneSignal HTTP {error.code}: {details}"
+                  ) from error
+
+              scheduled += 1
+              print(
+                  f"Scheduled {event_id} for "
+                  f"{send_time.isoformat()}"
+              )
+
+          print("Date:", today)
+          print("Expected events:", expected)
+          print("Scheduled future events:", scheduled)
+          print("Skipped past events:", skipped)
+          print("Test Users only - Nouakchott")
+          PY
