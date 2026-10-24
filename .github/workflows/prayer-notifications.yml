@@ -3,6 +3,8 @@ name: Prayer Notifications
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "0 12 * * *"
 
 permissions:
   contents: read
@@ -12,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Send last third night test
+      - name: Send daily test notification
         env:
           ONESIGNAL_REST_API_KEY: ${{ secrets.ONESIGNAL_REST_API_KEY }}
           ONESIGNAL_APP_ID: e41737a2-7d31-4a24-8a49-cbfc4e75aff0
@@ -32,10 +34,10 @@ jobs:
               "app_id": os.environ["ONESIGNAL_APP_ID"],
               "included_segments": ["Test Users"],
               "headings": {
-                  "en": "🌙 قيام الليل | شوايل الآخرة"
+                  "en": "🌿 شوايل الآخرة"
               },
               "contents": {
-                  "en": "🌙 دخل الثلث الأخير من الليل، وقت الدعاء والاستغفار والقيام. فلا تحرم نفسك من بركة هذا الوقت المبارك."
+                  "en": "دقائق مع القرآن، سكينة للقلب وزاد للآخرة."
               },
               "url": "https://sewdeti-gif.github.io/noor-ala-noor/"
           }
