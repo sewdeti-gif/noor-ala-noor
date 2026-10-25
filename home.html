@@ -12,8 +12,11 @@
 body{margin:0;padding:20px 14px;background:#f5f8f3;color:#183c2b;font-family:Arial,sans-serif;text-align:center}
 main{max-width:520px;margin:auto}
 header,section{background:white;border:1px solid #dce9df;border-radius:18px;padding:20px 15px;margin-bottom:16px}
-h1,h2{color:#176b43}h1{font-size:29px}h2{font-size:20px}
-.slogan,.note{line-height:1.9;color:#5b6f60}.note{font-size:13px}
+h1,h2{color:#176b43}
+h1{font-size:29px}
+h2{font-size:20px}
+.slogan,.note{line-height:1.9;color:#5b6f60}
+.note{font-size:13px}
 .surah{display:block;text-decoration:none;color:#176b43;border:1px solid #dce9df;border-radius:12px;padding:14px 10px;margin:10px 0;background:#fbfdfb;font-size:17px}
 button{display:block;width:100%;border:0;border-radius:12px;padding:14px;margin-top:10px;font-size:16px;background:#176b43;color:white;cursor:pointer}
 button:disabled{opacity:.65;cursor:wait}
@@ -23,29 +26,43 @@ button:disabled{opacity:.65;cursor:wait}
 <script>
 window.OneSignalDeferred=window.OneSignalDeferred||[];
 window.oneSignalReady=false;
+
 OneSignalDeferred.push(async function(OneSignal){
   try{
-await OneSignal.User.addTags({
-  prayer_coords: loc.latitude.toFixed(4) + "," + loc.longitude.toFixed(4),
-  prayer_timezone: loc.timezone
-});
+    await OneSignal.init({
+      appId:"e41737a2-7d31-4a24-8a49-cbfc4e75aff0",
+      serviceWorkerPath:"/noor-ala-noor/OneSignalSDKWorker.js",
+      serviceWorkerParam:{scope:"/noor-ala-noor/"}
+    });
 
     window.oneSignalReady=true;
-    document.getElementById("status").textContent="خدمة التنبيهات جاهزة. يمكنك تفعيل الإشعارات.";
-    if(window.savedPrayerLocation){await window.syncPrayerLocation();}
+
+    document.getElementById("status").textContent=
+      OneSignal.Notifications.permission
+      ? "تم السماح بإشعارات التطبيق."
+      : "خدمة التنبيهات جاهزة. يمكنك تفعيل الإشعارات.";
+
+    if(window.savedPrayerLocation){
+      await window.syncPrayerLocation();
+    }
   }catch(error){
-    document.getElementById("status").textContent="تعذر تحميل خدمة التنبيهات. تحقق من الاتصال وأعد فتح الصفحة.";
+    document.getElementById("status").textContent=
+      "تعذر تحميل خدمة التنبيهات. تحقق من الاتصال وأعد فتح الصفحة.";
     console.error(error);
   }
 });
 </script>
 </head>
+
 <body>
 <main>
 <header>
 <h1>شوايل الآخرة</h1>
-<p class="slogan">دقائق مع القرآن، سكينة للقلب وزاد للآخرة.</p>
+<p class="slogan">
+دقائق مع القرآن، سكينة للقلب وزاد للآخرة.
+</p>
 </header>
+
 <section>
 <h2>وردك مع القرآن</h2>
 <a class="surah" href="./Yassin.html">🌅 بعد الفجر — سورة يس</a>
@@ -54,68 +71,159 @@ await OneSignal.User.addTags({
 <a class="surah" href="./Waqiah.html">🌇 بعد المغرب — سورة الواقعة</a>
 <a class="surah" href="./Mulk.html">🌙 بعد العشاء — سورة الملك</a>
 </section>
+
 <section>
 <h2>موقع مواقيت الصلاة</h2>
-<p class="note">لا حاجة لاختيار المدينة يدويًا. وافق على إذن الموقع لتحديد مكانك تلقائيًا. يمكن تحديث الموقع عند السفر.</p>
+<p class="note">
+لا حاجة لاختيار المدينة يدويًا.
+وافق على إذن الموقع لتحديد مكانك تلقائيًا.
+يمكن تحديث الموقع عند السفر.
+</p>
+
 <button id="detectLocation">تحديد موقعي تلقائيًا</button>
-<p id="locationStatus" role="status" aria-live="polite">لم يُحدد الموقع بعد.</p>
+<p id="locationStatus" role="status" aria-live="polite">
+لم يُحدد الموقع بعد.
+</p>
+
 <h2>التنبيهات القرآنية</h2>
 <button id="enableNotifications">تفعيل التنبيهات</button>
-<p id="status" role="status" aria-live="polite">جارٍ تحميل إعدادات التنبيهات...</p>
+<p id="status" role="status" aria-live="polite">
+جارٍ تحميل إعدادات التنبيهات...
+</p>
 </section>
 </main>
+
 <script>
 const status=document.getElementById("status");
 const locationStatus=document.getElementById("locationStatus");
 const locationButton=document.getElementById("detectLocation");
-function validLocation(value){return value && Number.isFinite(value.latitude) && Number.isFinite(value.longitude) && Math.abs(value.latitude)<=90 && Math.abs(value.longitude)<=180;}
+
+function validLocation(value){
+  return value &&
+    Number.isFinite(value.latitude) &&
+    Number.isFinite(value.longitude) &&
+    Math.abs(value.latitude)<=90 &&
+    Math.abs(value.longitude)<=180;
+}
+
 try{
-  const previous=JSON.parse(localStorage.getItem("prayerLocation")||"null");
+  const previous=JSON.parse(
+    localStorage.getItem("prayerLocation")||"null"
+  );
+
   if(validLocation(previous)){
     window.savedPrayerLocation=previous;
-    locationStatus.textContent="الموقع محفوظ على هذا الجهاز. اضغط تحديث الموقع إذا انتقلت إلى مكان آخر.";
+    locationStatus.textContent=
+      "الموقع محفوظ على هذا الجهاز. اضغط تحديث الموقع إذا انتقلت إلى مكان آخر.";
   }
-}catch(error){console.warn(error);}
+}catch(error){
+  console.warn(error);
+}
+
 window.syncPrayerLocation=async function(){
-  if(!window.oneSignalReady||!validLocation(window.savedPrayerLocation))return;
+  if(
+    !window.oneSignalReady ||
+    !validLocation(window.savedPrayerLocation)
+  ) return;
+
   try{
     const loc=window.savedPrayerLocation;
+
     await OneSignal.User.addTags({
-      prayer_lat:loc.latitude.toFixed(4),
-      prayer_lon:loc.longitude.toFixed(4),
+      prayer_coords:
+        loc.latitude.toFixed(4)+","+loc.longitude.toFixed(4),
       prayer_timezone:loc.timezone
     });
-    locationStatus.textContent="تم تحديد الموقع وإرسال إعداداته إلى خدمة التنبيهات.";
+
+    locationStatus.textContent=
+      "تم تحديد الموقع وإرسال إعداداته إلى خدمة التنبيهات.";
   }catch(error){
-    locationStatus.textContent="حُفظ الموقع على الجهاز، لكن تعذرت مزامنته مع خدمة التنبيهات. حاول مرة أخرى.";
+    locationStatus.textContent=
+      "حُفظ الموقع على الجهاز، لكن تعذرت مزامنته مع خدمة التنبيهات. حاول مرة أخرى.";
     console.error(error);
   }
 };
+
 locationButton.addEventListener("click",function(){
-  if(!navigator.geolocation){locationStatus.textContent="هذا المتصفح لا يدعم تحديد الموقع.";return;}
+  if(!navigator.geolocation){
+    locationStatus.textContent=
+      "هذا المتصفح لا يدعم تحديد الموقع.";
+    return;
+  }
+
   locationButton.disabled=true;
-  locationStatus.textContent="جارٍ تحديد موقعك، قد يطلب المتصفح الإذن...";
-  navigator.geolocation.getCurrentPosition(async function(position){
-    locationButton.disabled=false;
-    const timezone=Intl.DateTimeFormat().resolvedOptions().timeZone||"UTC";
-    const loc={latitude:position.coords.latitude,longitude:position.coords.longitude,timezone:timezone};
-    window.savedPrayerLocation=loc;
-    localStorage.setItem("prayerLocation",JSON.stringify(loc));
-    locationStatus.textContent="تم تحديد موقعك وحفظ المنطقة الزمنية: "+timezone;
-    if(window.oneSignalReady)await window.syncPrayerLocation();
-    else locationStatus.textContent+=". ستتم المزامنة عند جاهزية خدمة التنبيهات.";
-  },function(error){
-    locationButton.disabled=false;
-    locationStatus.textContent=error.code===1?"لم يُسمح بالوصول إلى الموقع. يمكن السماح به من إعدادات الموقع في المتصفح.":"تعذر تحديد الموقع الآن. تحقق من تشغيل خدمة الموقع وحاول مجددًا.";
-  },{enableHighAccuracy:false,timeout:15000,maximumAge:300000});
+  locationStatus.textContent=
+    "جارٍ تحديد موقعك، قد يطلب المتصفح الإذن...";
+
+  navigator.geolocation.getCurrentPosition(
+    async function(position){
+      locationButton.disabled=false;
+
+      const timezone=
+        Intl.DateTimeFormat().resolvedOptions().timeZone||"UTC";
+
+      const loc={
+        latitude:position.coords.latitude,
+        longitude:position.coords.longitude,
+        timezone:timezone
+      };
+
+      window.savedPrayerLocation=loc;
+      localStorage.setItem(
+        "prayerLocation",
+        JSON.stringify(loc)
+      );
+
+      locationStatus.textContent=
+        "تم تحديد موقعك وحفظ المنطقة الزمنية: "+timezone;
+
+      if(window.oneSignalReady){
+        await window.syncPrayerLocation();
+      }else{
+        locationStatus.textContent+=
+          ". ستتم المزامنة عند جاهزية خدمة التنبيهات.";
+      }
+    },
+    function(error){
+      locationButton.disabled=false;
+      locationStatus.textContent=
+        error.code===1
+        ? "لم يُسمح بالوصول إلى الموقع. يمكن السماح به من إعدادات الموقع في المتصفح."
+        : "تعذر تحديد الموقع الآن. تحقق من تشغيل خدمة الموقع وحاول مجددًا.";
+    },
+    {
+      enableHighAccuracy:false,
+      timeout:15000,
+      maximumAge:300000
+    }
+  );
 });
-document.getElementById("enableNotifications").addEventListener("click",async function(){
-  if(!window.oneSignalReady){status.textContent="انتظر اكتمال تحميل خدمة التنبيهات ثم حاول مرة أخرى.";return;}
+
+document.getElementById(
+  "enableNotifications"
+).addEventListener("click",async function(){
+  if(!window.oneSignalReady){
+    status.textContent=
+      "انتظر اكتمال تحميل خدمة التنبيهات ثم حاول مرة أخرى.";
+    return;
+  }
+
   try{
     await OneSignal.Notifications.requestPermission();
-    status.textContent=OneSignal.Notifications.permission?"تم السماح بإشعارات التطبيق.":"لم يتم منح إذن الإشعارات. تحقق من إعدادات المتصفح.";
-    if(window.savedPrayerLocation)await window.syncPrayerLocation();
-  }catch(error){status.textContent="تعذر طلب إذن الإشعارات. تحقق من إعدادات المتصفح.";console.error(error);}
+
+    status.textContent=
+      OneSignal.Notifications.permission
+      ? "تم السماح بإشعارات التطبيق."
+      : "لم يتم منح إذن الإشعارات. تحقق من إعدادات المتصفح.";
+
+    if(window.savedPrayerLocation){
+      await window.syncPrayerLocation();
+    }
+  }catch(error){
+    status.textContent=
+      "تعذر طلب إذن الإشعارات. تحقق من إعدادات المتصفح.";
+    console.error(error);
+  }
 });
 </script>
 </body>
