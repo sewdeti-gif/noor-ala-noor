@@ -6,6 +6,8 @@
   <title>سورة الفتح - نور على نور</title>
 
   <style>
+    * { box-sizing: border-box; }
+
     body {
       font-family: Arial, sans-serif;
       background: #f8f5ed;
@@ -26,7 +28,11 @@
     }
 
     h1 { color: #5b4636; }
-    .riwaya { color: #806044; font-weight: bold; }
+
+    .riwaya {
+      color: #806044;
+      font-weight: bold;
+    }
 
     .player {
       position: sticky;
@@ -37,7 +43,10 @@
       z-index: 2;
     }
 
-    audio { width: 100%; }
+    audio {
+      width: 100%;
+      display: block;
+    }
 
     #quran {
       font-family: "Traditional Arabic", serif;
@@ -63,6 +72,7 @@
     }
 
     .done { background: #39734b; }
+
     #status {
       background: #f8f5ed;
       padding: 8px;
@@ -73,23 +83,30 @@
 
 <body>
   <main class="surah">
+
     <h1>سورة الفتح</h1>
     <p class="riwaya">رواية ورش عن نافع</p>
 
     <div class="player">
       <p>تلاوة الشيخ محمود خليل الحصري — ورش</p>
-      <audio controls preload="none">
+
+      <audio id="surahAudio" controls preload="auto">
         <source
-          src="https://cdn.mp3quran.net/download/audio/mahmoud-husary/r3/048.mp3"
+          src="https://cdn.mp3quran.net/audio/mahmoud-husary/r3/048.mp3"
           type="audio/mpeg">
         متصفحك لا يدعم تشغيل الصوت.
       </audio>
     </div>
 
     <h2>المصحف</h2>
-    <div id="quran">جارٍ تحميل آيات سورة الفتح...</div>
 
-    <p id="status">لم تُسجَّل القراءة بعد.</p>
+    <div id="quran">
+      جارٍ تحميل آيات سورة الفتح...
+    </div>
+
+    <p id="status">
+      لم تُسجَّل القراءة بعد.
+    </p>
 
     <button class="button done" onclick="markDone()">
       ✓ تمّت القراءة
@@ -101,11 +118,56 @@
       </a>
     </p>
 
-    <p>نور على نور<br>بالقرآن نرتقي، وبالصلاة يطمئن القلب.</p>
+    <p>
+      نور على نور<br>
+      بالقرآن نرتقي، وبالصلاة يطمئن القلب.
+    </p>
+
   </main>
 
   <script>
-    const key = "feth_reading_completed";
+    const readingKey = "feth_reading_completed";
+    const positionKey = "feth_audio_position";
+
+    const audio = document.getElementById("surahAudio");
+
+    function savePosition() {
+      if (
+        Number.isFinite(audio.currentTime) &&
+        audio.currentTime > 0
+      ) {
+        localStorage.setItem(
+          positionKey,
+          String(audio.currentTime)
+        );
+      }
+    }
+
+    audio.addEventListener("loadedmetadata", function () {
+      const saved = Number(
+        localStorage.getItem(positionKey) || 0
+      );
+
+      if (
+        Number.isFinite(saved) &&
+        saved > 0 &&
+        Number.isFinite(audio.duration) &&
+        saved < audio.duration - 3
+      ) {
+        try {
+          audio.currentTime = saved;
+        } catch (error) {
+          console.log("تعذرت استعادة موضع الاستماع");
+        }
+      }
+    });
+
+    audio.addEventListener("timeupdate", savePosition);
+    audio.addEventListener("pause", savePosition);
+
+    audio.addEventListener("ended", function () {
+      localStorage.removeItem(positionKey);
+    });
 
     async function loadQuran() {
       const box = document.getElementById("quran");
@@ -129,6 +191,7 @@
             ayah.text + " ۝" + ayah.number + " ";
           box.appendChild(span);
         });
+
       } catch (error) {
         box.textContent =
           "تعذّر تحميل نص المصحف. تحققي من اتصال الإنترنت.";
@@ -137,13 +200,13 @@
 
     function showStatus() {
       document.getElementById("status").textContent =
-        localStorage.getItem(key) === "yes"
+        localStorage.getItem(readingKey) === "yes"
           ? "الحمد لله، سجّلتِ إتمام سورة الفتح."
           : "لم تُسجَّل القراءة بعد.";
     }
 
     function markDone() {
-      localStorage.setItem(key, "yes");
+      localStorage.setItem(readingKey, "yes");
       showStatus();
     }
 
