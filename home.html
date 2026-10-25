@@ -25,11 +25,11 @@ window.OneSignalDeferred=window.OneSignalDeferred||[];
 window.oneSignalReady=false;
 OneSignalDeferred.push(async function(OneSignal){
   try{
-    await OneSignal.init({
-      appId:"e41737a2-7d31-4a24-8a49-cbfc4e75aff0",
-      serviceWorkerPath:"/noor-ala-noor/OneSignalSDKWorker.js",
-      serviceWorkerParam:{scope:"/noor-ala-noor/"}
-    });
+await OneSignal.User.addTags({
+  prayer_coords: loc.latitude.toFixed(4) + "," + loc.longitude.toFixed(4),
+  prayer_timezone: loc.timezone
+});
+
     window.oneSignalReady=true;
     document.getElementById("status").textContent="خدمة التنبيهات جاهزة. يمكنك تفعيل الإشعارات.";
     if(window.savedPrayerLocation){await window.syncPrayerLocation();}
