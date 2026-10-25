@@ -200,4 +200,93 @@ audio.addEventListener("loadedmetadata", function () {
   if (
     Number.isFinite(saved) &&
     saved > 0 &&
-    Number.isFinite(audio
+        Number.isFinite(audio.duration) &&
+    saved < audio.duration - 3
+  ) {
+    audio.currentTime = saved;
+  }
+  setPlaybackStatus("المشغّل جاهز للاستماع.");
+});
+
+audio.addEventListener("timeupdate", savePosition);
+audio.addEventListener("pause", savePosition);
+
+audio.addEventListener("waiting", function () {
+  setPlaybackStatus("جارٍ تحميل التلاوة...");
+});
+
+audio.addEventListener("playing", function () {
+  setPlaybackStatus("التلاوة تعمل الآن.");
+});
+
+audio.addEventListener("stalled", function () {
+  setPlaybackStatus("تأخر تحميل الصوت.");
+});
+
+audio.addEventListener("error", function () {
+  setPlaybackStatus("تعذّر تشغيل التسجيل.");
+});
+
+audio.addEventListener("ended", function () {
+  localStorage.removeItem(positionKey);
+  setPlaybackStatus("اكتملت التلاوة، الحمد لله.");
+});
+
+function skipAudio(seconds) {
+  if (!Number.isFinite(audio.duration)) {
+    setPlaybackStatus("انتظري تحميل التسجيل.");
+    return;
+  }
+
+  const target = Math.max(
+    0,
+    Math.min(audio.duration - 0.1, audio.currentTime + seconds)
+  );
+
+  audio.currentTime = target;
+  savePosition();
+}
+
+async function loadQuran() {
+  const box = document.getElementById("quran");
+
+  try {
+    const response = await fetch(
+      "https://api.quranpedia.net/v1/mushafs/4/36"
+    );
+
+    if (!response.ok) throw new Error("تعذّر تحميل المصحف");
+
+    const ayahs = await response.json();
+    box.replaceChildren();
+
+    ayahs.forEach(ayah => {
+      const span = document.createElement("span");
+      span.className = "ayah";
+      span.textContent =
+        ayah.text + " ۝" + ayah.number + " ";
+      box.appendChild(span);
+    });
+  } catch (error) {
+    box.textContent =
+      "تعذّر تحميل نص المصحف. تحققي من اتصال الإنترنت.";
+  }
+}
+
+function showStatus() {
+  document.getElementById("status").textContent =
+    localStorage.getItem(readingKey) === "yes"
+      ? "الحمد لله، سجّلتِ إتمام سورة يس."
+      : "لم تُسجَّل القراءة بعد.";
+}
+
+function markDone() {
+  localStorage.setItem(readingKey, "yes");
+  showStatus();
+}
+
+loadQuran();
+showStatus();
+</script>
+</body>
+</html>
