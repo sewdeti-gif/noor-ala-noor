@@ -1,0 +1,102 @@
+name: Preview International Prayer Reminders
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install requirements
+        run: pip install -r requirements.txt
+
+      - name: Preview reminders using subscriber location
+        env:
+          ONESIGNAL_REST_API_KEY: ${{ secrets.ONESIGNAL_REST_API_KEY }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import urllib.request
+
+          from datetime import datetime
+          from zoneinfo import ZoneInfo
+          from prayer_scheduler import schedule_for_day
+
+          app_id = "e41737a2-7d31-4a24-8a49-cbfc4e75aff0"
+          user_id = "c9796f0b-c6ae-4c13-9514-b11f629ff869"
+
+          key = os.environ.get("ONESIGNAL_REST_API_KEY")
+
+          if not key:
+              raise RuntimeError("Missing OneSignal API key")
+
+          url = (
+              f"https://api.onesignal.com/apps/{app_id}"
+              f"/users/by/onesignal_id/{user_id}"
+          )
+
+          request = urllib.request.Request(
+              url,
+              headers={
+                  "Authorization": "Key " + key,
+                  "Accept": "application/json"
+              },
+              method="GET"
+          )
+
+          with urllib.request.urlopen(
+              request, timeout=30
+          ) as response:
+              user = json.load(response)
+
+          properties = user.get("properties") or {}
+          tags = properties.get("tags") or {}
+
+          coords = tags.get("prayer_coords")
+          timezone = tags.get("prayer_timezone")
+
+          if not coords or not timezone:
+              raise RuntimeError("Missing location data")
+
+          lat, lon = map(float, coords.split(","))
+
+          if not (-90 <= lat <= 90 and -180 <= lon <= 180):
+              raise ValueError("Invalid coordinates")
+
+          tz = ZoneInfo(timezone)
+          today = datetime.now(tz).date()
+
+          events = schedule_for_day(
+              today, lat, lon, timezone
+          )
+
+          print("Location data: VALID")
+          print("Timezone:", timezone)
+          print("Date:", today)
+          print("Total reminders:", len(events))
+
+          qiyam = [
+              event for event in events
+              if event["id"].startswith("qiyam_")
+          ]
+
+          print("Qiyam reminders:", len(qiyam))
+
+          for event in qiyam:
+              print(event["id"], event["time"])
+
+          print("TEST ONLY - NO NOTIFICATIONS SENT")
+          PY
