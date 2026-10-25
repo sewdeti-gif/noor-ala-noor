@@ -1,0 +1,39 @@
+name: Test International Push
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Send one test notification
+        env:
+          ONESIGNAL_REST_API_KEY: ${{ secrets.ONESIGNAL_REST_API_KEY }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import urllib.request
+
+          app_id = "e41737a2-7d31-4a24-8a49-cbfc4e75aff0"
+
+          user_id = (
+              "c9796f0b-c6ae-4c13-9514-b11f629ff869"
+          )
+
+          key = os.environ.get("ONESIGNAL_REST_API_KEY")
+
+          if not key:
+              raise RuntimeError("Missing OneSignal API key")
+
+          payload = {
+              "app_id": app_id,
+              "target_channel": "push",
+              "include_aliases": {
+                  "onesignal_id": [user_id]
+             
