@@ -1,112 +1,193 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>سورة الواقعة | نور على نور</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f8f5ed;
-      color: #333;
-      margin: 0;
-      padding: 20px 15px;
-      line-height: 2.2;
-      text-align: center;
-    }
-    h1 { color: #5b4636; }
-    .riwaya { color: #806044; font-weight: bold; }
-    .box {
-      max-width: 750px;
-      margin: 20px auto;
-      padding: 20px;
-      background: white;
-      border-radius: 15px;
-      box-shadow: 0 2px 8px #00000012;
-    }
-    #quran {
-      text-align: justify;
-      font-size: 25px;
-      line-height: 2.3;
-    }
-    .ayah { margin: 0 3px; }
-    audio { width: 100%; margin: 15px 0; }
-    button {
-      background: #806044;
-      color: white;
-      border: 0;
-      padding: 12px 20px;
-      margin: 8px;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    a { color: #806044; text-decoration: none; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سورة الواقعة | نور على نور</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  font-family: Arial, sans-serif;
+  background: #f8f5ed;
+  color: #333;
+  margin: 0;
+  padding: 20px 15px;
+  line-height: 2.2;
+  text-align: center;
+}
+
+h1 { color: #5b4636; }
+
+.riwaya {
+  color: #806044;
+  font-weight: bold;
+}
+
+.box {
+  max-width: 750px;
+  margin: 20px auto;
+  padding: 20px;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 2px 8px #00000012;
+}
+
+#quran {
+  text-align: justify;
+  font-size: 25px;
+  line-height: 2.3;
+}
+
+.ayah { margin: 0 3px; }
+
+audio {
+  width: 100%;
+  margin: 15px 0;
+}
+
+button {
+  background: #806044;
+  color: white;
+  border: 0;
+  padding: 12px 20px;
+  margin: 8px;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+a {
+  color: #806044;
+  text-decoration: none;
+}
+</style>
 </head>
+
 <body>
 
-  <h1>سورة الواقعة</h1>
-  <p class="riwaya">رواية ورش عن نافع</p>
-  <p>بالقرآن نرتقي، وبالصلاة يطمئن القلب.</p>
+<h1>سورة الواقعة</h1>
+<p class="riwaya">رواية ورش عن نافع</p>
+<p>بالقرآن نرتقي، وبالصلاة يطمئن القلب.</p>
 
-  <div class="box">
-    <h2>📖 تلاوة سورة الواقعة</h2>
-    <p id="status">جارٍ تحميل الآيات...</p>
-    <div id="quran"></div>
-  </div>
+<div class="box">
+  <h2>📖 تلاوة سورة الواقعة</h2>
+  <p id="status">جارٍ تحميل الآيات...</p>
+  <div id="quran"></div>
+</div>
 
-  <div class="box">
-    <h2>🎧 الاستماع</h2>
-    <audio controls preload="none">
-      <source src="https://cdn.mp3quran.net/audio/mahmoud-husary/r3/056.mp3" type="audio/mpeg">
-      متصفحك لا يدعم تشغيل الصوت.
-    </audio>
-  </div>
+<div class="box">
+  <h2>🎧 الاستماع</h2>
 
-  <button onclick="markDone()">تمّت القراءة ✓</button>
-  <p id="done"></p>
-  <p><a href="home.html">← العودة إلى الورد القرآني</a></p>
+  <audio
+    id="surahAudio"
+    controls
+    preload="metadata"
+    src="./056.mp3?v=1">
+    متصفحك لا يدعم تشغيل الصوت.
+  </audio>
+</div>
 
-  <script>
-    fetch("https://api.quranpedia.net/v1/mushafs/4/56")
-      .then(response => {
-        if (!response.ok) throw new Error("تعذر تحميل النص");
-        return response.json();
-      })
-      .then(data => {
-        const verses = Array.isArray(data) ? data : (data.data || data.verses || []);
-        const container = document.getElementById("quran");
+<button onclick="markDone()">تمّت القراءة ✓</button>
+<p id="done"></p>
 
-        if (!verses.length) throw new Error("لا توجد آيات في الاستجابة");
+<p>
+  <a href="home.html">← العودة إلى الورد القرآني</a>
+</p>
 
-        container.replaceChildren();
+<script>
+const readingKey = "waqiah_reading_completed";
+const positionKey = "waqiah_audio_position";
+const audio = document.getElementById("surahAudio");
 
-        verses.forEach(verse => {
-          if (verse.text) {
-            const span = document.createElement("span");
-            span.className = "ayah";
-            span.textContent = verse.text + " ۝ ";
-            container.appendChild(span);
-          }
-        });
+function savePosition() {
+  if (
+    Number.isFinite(audio.currentTime) &&
+    audio.currentTime > 0
+  ) {
+    localStorage.setItem(
+      positionKey,
+      String(audio.currentTime)
+    );
+  }
+}
 
-        if (!container.textContent.trim()) throw new Error("لم يُعثر على نص الآيات");
+audio.addEventListener("loadedmetadata", function () {
+  const saved = Number(
+    localStorage.getItem(positionKey) || 0
+  );
 
-        document.getElementById("status").textContent = "بسم الله الرحمن الرحيم";
-      })
-      .catch(() => {
-        document.getElementById("status").textContent =
-          "تعذّر تحميل الآيات. تحققي من الاتصال بالمصدر.";
-      });
+  if (
+    Number.isFinite(saved) &&
+    saved > 0 &&
+    Number.isFinite(audio.duration) &&
+    saved < audio.duration - 3
+  ) {
+    audio.currentTime = saved;
+  }
+});
 
-    function markDone() {
-      localStorage.setItem("waqiah_reading_completed", "true");
-      document.getElementById("done").textContent =
-        "بارك الله فيكِ، تم تسجيل إتمام القراءة على هذا الجهاز.";
+audio.addEventListener("timeupdate", savePosition);
+audio.addEventListener("pause", savePosition);
+
+audio.addEventListener("ended", function () {
+  localStorage.removeItem(positionKey);
+});
+
+fetch("https://api.quranpedia.net/v1/mushafs/4/56")
+  .then(response => {
+    if (!response.ok) {
+      throw new Error("تعذر تحميل النص");
     }
-  </script>
+    return response.json();
+  })
+  .then(data => {
+    const verses = Array.isArray(data)
+      ? data
+      : (data.data || data.verses || []);
+
+    const container = document.getElementById("quran");
+
+    if (!verses.length) {
+      throw new Error("لا توجد آيات في الاستجابة");
+    }
+
+    container.replaceChildren();
+
+    verses.forEach(verse => {
+      if (verse.text) {
+        const span = document.createElement("span");
+        span.className = "ayah";
+        span.textContent = verse.text + " ۝ ";
+        container.appendChild(span);
+      }
+    });
+
+    if (!container.textContent.trim()) {
+      throw new Error("لم يُعثر على نص الآيات");
+    }
+
+    document.getElementById("status").textContent =
+      "بسم الله الرحمن الرحيم";
+  })
+  .catch(() => {
+    document.getElementById("status").textContent =
+      "تعذّر تحميل الآيات. تحققي من الاتصال بالمصدر.";
+  });
+
+function markDone() {
+  localStorage.setItem(readingKey, "true");
+
+  document.getElementById("done").textContent =
+    "بارك الله فيكِ، تم تسجيل إتمام القراءة على هذا الجهاز.";
+}
+
+if (localStorage.getItem(readingKey) === "true") {
+  document.getElementById("done").textContent =
+    "الحمد لله، سبق تسجيل إتمام سورة الواقعة.";
+}
+</script>
 
 </body>
 </html>
