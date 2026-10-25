@@ -1,6 +1,6 @@
 
 """
-فحص بيانات المشتركين في OneSignal.
+فحص بيانات مستخدم واحد في OneSignal.
 قراءة فقط: لا يرسل إشعارات ولا يعدل البيانات.
 """
 
@@ -11,17 +11,23 @@ import urllib.error
 import urllib.request
 
 APP_ID = "e41737a2-7d31-4a24-8a49-cbfc4e75aff0"
-API_URL = "https://api.onesignal.com/apps/{}/users"
+
+USER_ID = (
+    "c9796f0b-c6ae-4c13-9514-b11f629ff869"
+)
 
 
-def check_subscribers():
+def check_subscriber():
     api_key = os.environ.get("ONESIGNAL_REST_API_KEY")
 
     if not api_key:
         print("ERROR: OneSignal API key is missing.")
         return 1
 
-    url = API_URL.format(APP_ID) + "?limit=100"
+    url = (
+        f"https://api.onesignal.com/apps/{APP_ID}"
+        f"/users/by/onesignal_id/{USER_ID}"
+    )
 
     request = urllib.request.Request(
         url,
@@ -46,53 +52,39 @@ def check_subscribers():
         print("Connection error:", type(error).__name__)
         return 1
 
-    users = data.get("users", [])
+    properties = data.get("properties") or {}
+    tags = properties.get("tags") or {}
 
-    print("Users returned:", len(users))
+    coords = tags.get("prayer_coords")
+    timezone = tags.get("prayer_timezone")
 
-    valid_locations = 0
-    missing_locations = 0
+    print("User record found: YES")
+    print("Prayer coordinates present:", bool(coords))
+    print("Prayer timezone present:", bool(timezone))
 
-    for user in users:
-        properties = user.get("properties") or {}
-        tags = properties.get("tags") or {}
+    if not coords or not timezone:
+        print("RESULT: Location data incomplete.")
+        return 1
 
-        coords = tags.get("prayer_coords")
-        timezone = tags.get("prayer_timezone")
-
-        if not coords or not timezone:
-            missing_locations += 1
-            continue
-
-        try:
-            latitude, longitude = map(
-                float, coords.split(",")
-            )
-
-            if not (
-                -90 <= latitude <= 90
-                and -180 <= longitude <= 180
-            ):
-                raise ValueError("Invalid coordinates")
-
-        except (ValueError, AttributeError):
-            missing_locations += 1
-            continue
-
-        valid_locations += 1
-
-    print("Users with valid location:", valid_locations)
-    print("Users missing valid location:", missing_locations)
-
-    if data.get("next_cursor"):
-        print(
-            "NOTE: More users exist; "
-            "this check covers only the first page."
+    try:
+        latitude, longitude = map(
+            float, coords.split(",")
         )
 
+        if not (
+            -90 <= latitude <= 90
+            and -180 <= longitude <= 180
+        ):
+            raise ValueError("Invalid coordinates")
+
+    except (ValueError, AttributeError):
+        print("RESULT: Invalid coordinates.")
+        return 1
+
+    print("RESULT: Location data valid.")
     print("Read-only check completed.")
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(check_subscribers())
+    sys.exit(check_subscriber())
