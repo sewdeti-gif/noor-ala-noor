@@ -19,12 +19,10 @@ jobs:
           import json
           import os
           import urllib.request
+          import urllib.error
 
           app_id = "e41737a2-7d31-4a24-8a49-cbfc4e75aff0"
-
-          user_id = (
-              "c9796f0b-c6ae-4c13-9514-b11f629ff869"
-          )
+          user_id = "c9796f0b-c6ae-4c13-9514-b11f629ff869"
 
           key = os.environ.get("ONESIGNAL_REST_API_KEY")
 
@@ -36,4 +34,45 @@ jobs:
               "target_channel": "push",
               "include_aliases": {
                   "onesignal_id": [user_id]
-             
+              },
+              "headings": {
+                  "en": "🌿 شوايل الآخرة"
+              },
+              "contents": {
+                  "en": "تجربة التنبيهات الدولية: دقائق مع القرآن، سكينة للقلب وزاد للآخرة."
+              },
+              "url": "https://sewdeti-gif.github.io/noor-ala-noor/"
+          }
+
+          request = urllib.request.Request(
+              "https://api.onesignal.com/notifications",
+              data=json.dumps(
+                  payload,
+                  ensure_ascii=False
+              ).encode("utf-8"),
+              headers={
+                  "Authorization": "Key " + key,
+                  "Content-Type": "application/json"
+              },
+              method="POST"
+          )
+
+          try:
+              with urllib.request.urlopen(
+                  request, timeout=30
+              ) as response:
+                  result = json.load(response)
+
+          except urllib.error.HTTPError as error:
+              print("HTTP error:", error.code)
+              raise
+
+          if result.get("errors"):
+              raise RuntimeError(str(result["errors"]))
+
+          if not result.get("id"):
+              raise RuntimeError("No notification ID returned")
+
+          print("Test notification accepted by OneSignal")
+          print("Notification ID:", result["id"])
+          PY
