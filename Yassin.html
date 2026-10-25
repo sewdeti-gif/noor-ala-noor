@@ -26,7 +26,10 @@
 
     h1 { color: #5b4636; }
 
-    .riwaya { color: #806044; font-weight: bold; }
+    .riwaya {
+      color: #806044;
+      font-weight: bold;
+    }
 
     .player {
       position: sticky;
@@ -63,7 +66,12 @@
     }
 
     .done { background: #39734b; }
-    #status { background: #f8f5ed; padding: 8px; border-radius: 10px; }
+
+    #status {
+      background: #f8f5ed;
+      padding: 8px;
+      border-radius: 10px;
+    }
   </style>
 </head>
 
@@ -74,10 +82,13 @@
 
     <div class="player">
       <p>تلاوة الشيخ محمود خليل الحصري — ورش</p>
-      ./036.mp3
-        <source
-          src="https://cdn.mp3quran.net/audio/mahmoud-husary/r3/036.mp3"
-          type="audio/mpeg">
+
+      <audio
+        id="surahAudio"
+        controls
+        preload="metadata"
+      >
+        <source src="./036.mp3" type="audio/mpeg">
         متصفحك لا يدعم تشغيل الصوت.
       </audio>
     </div>
@@ -92,14 +103,19 @@
     </button>
 
     <p>
-      <a class="button" href="home.html">← الرجوع إلى الورد</a>
+      <a class="button" href="home.html">
+        ← الرجوع إلى الورد
+      </a>
     </p>
 
-    <p>نور على نور<br>بالقرآن نرتقي، وبالصلاة يطمئن القلب.</p>
+    <p>
+      نور على نور<br>
+      بالقرآن نرتقي، وبالصلاة يطمئن القلب.
+    </p>
   </main>
 
   <script>
-    const key = "yassin_reading_completed";
+    const readingKey = "yassin_reading_completed";
 
     async function loadQuran() {
       const box = document.getElementById("quran");
@@ -109,7 +125,9 @@
           "https://api.quranpedia.net/v1/mushafs/4/36"
         );
 
-        if (!response.ok) throw new Error("تعذّر تحميل المصحف");
+        if (!response.ok) {
+          throw new Error("تعذّر تحميل المصحف");
+        }
 
         const ayahs = await response.json();
         box.replaceChildren();
@@ -117,9 +135,11 @@
         ayahs.forEach(ayah => {
           const span = document.createElement("span");
           span.className = "ayah";
-          span.textContent = ayah.text + " ۝" + ayah.number + " ";
+          span.textContent =
+            ayah.text + " ۝" + ayah.number + " ";
           box.appendChild(span);
         });
+
       } catch (error) {
         box.textContent =
           "تعذّر تحميل نص المصحف. تحققي من اتصال الإنترنت.";
@@ -128,42 +148,51 @@
 
     function showStatus() {
       document.getElementById("status").textContent =
-        localStorage.getItem(key) === "yes"
+        localStorage.getItem(readingKey) === "yes"
           ? "الحمد لله، سجّلتِ إتمام سورة يس."
           : "لم تُسجَّل القراءة بعد.";
     }
 
     function markDone() {
-      localStorage.setItem(key, "yes");
+      localStorage.setItem(readingKey, "yes");
       showStatus();
     }
 
     loadQuran();
     showStatus();
+
+    // حفظ موضع التلاوة واستعادته
+    (function () {
+      const audio = document.getElementById("surahAudio");
+      const positionKey = "yassin_audio_position";
+
+      audio.addEventListener("loadedmetadata", function () {
+        const saved = Number(
+          localStorage.getItem(positionKey) || 0
+        );
+
+        if (
+          saved > 0 &&
+          Number.isFinite(audio.duration) &&
+          saved < audio.duration - 3
+        ) {
+          audio.currentTime = saved;
+        }
+      });
+
+      audio.addEventListener("timeupdate", function () {
+        if (audio.currentTime > 0) {
+          localStorage.setItem(
+            positionKey,
+            String(audio.currentTime)
+          );
+        }
+      });
+
+      audio.addEventListener("ended", function () {
+        localStorage.removeItem(positionKey);
+      });
+    })();
   </script>
-  <script>
-(function () {
-  const audio = document.getElementById("surahAudio");
-  const key = "yassin_audio_position";
-
-  audio.addEventListener("loadedmetadata", function () {
-    const saved = Number(localStorage.getItem(key) || 0);
-
-    if (saved > 0 && saved < audio.duration - 3) {
-      audio.currentTime = saved;
-    }
-  });
-
-  audio.addEventListener("timeupdate", function () {
-    if (audio.currentTime > 0) {
-      localStorage.setItem(key, audio.currentTime);
-    }
-  });
-
-  audio.addEventListener("ended", function () {
-    localStorage.removeItem(key);
-  });
-})();
-</script>
 </body>
 </html>
