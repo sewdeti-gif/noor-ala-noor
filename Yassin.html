@@ -141,5 +141,29 @@
     loadQuran();
     showStatus();
   </script>
+  <script>
+(function () {
+  const audio = document.getElementById("surahAudio");
+  const key = "yassin_audio_position";
+
+  audio.addEventListener("loadedmetadata", function () {
+    const saved = Number(localStorage.getItem(key) || 0);
+
+    if (saved > 0 && saved < audio.duration - 3) {
+      audio.currentTime = saved;
+    }
+  });
+
+  audio.addEventListener("timeupdate", function () {
+    if (audio.currentTime > 0) {
+      localStorage.setItem(key, audio.currentTime);
+    }
+  });
+
+  audio.addEventListener("ended", function () {
+    localStorage.removeItem(key);
+  });
+})();
+</script>
 </body>
 </html>
