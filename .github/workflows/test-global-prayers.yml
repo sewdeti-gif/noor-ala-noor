@@ -1,0 +1,27 @@
+
+name: Test Global Prayer Times
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download project
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install requirements
+        run: pip install -r requirements.txt
+
+      - name: Test prayer times
+        run: python3 test-global-prayers.py
