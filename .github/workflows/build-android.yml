@@ -10,20 +10,15 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Download project
         uses: actions/checkout@v4
 
       - name: Check Quran files
         run: |
-          test -f home.html
-          test -f Yassin.html
-          test -f Feth.html
-          test -f Naba.html
-          test -f Waqiah.html
-          test -f Mulk.html
-          echo "Quran files verified"
+          for file in home.html Yassin.html Feth.html Naba.html Waqiah.html Mulk.html; do
+            test -f "$file"
+          done
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -31,87 +26,56 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Check Android SDK
-        run: |
-          test -d "$ANDROID_HOME"
-          echo "Android SDK is available"
-
       - name: Create Android project
         run: |
           mkdir -p android-app/app/src/main/java/com/noorala/noor
-
           cat > android-app/settings.gradle <<'EOF'
           pluginManagement {
-              repositories {
-                  google()
-                  mavenCentral()
-                  gradlePluginPortal()
-              }
+              repositories { google(); mavenCentral(); gradlePluginPortal() }
           }
           dependencyResolutionManagement {
               repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-              repositories {
-                  google()
-                  mavenCentral()
-              }
+              repositories { google(); mavenCentral() }
           }
-          rootProject.name = "NoorAlaNoor"
+          rootProject.name = 'NoorAlaNoor'
           include ':app'
           EOF
-
           cat > android-app/build.gradle <<'EOF'
           plugins {
               id 'com.android.application' version '8.5.2' apply false
           }
           EOF
-
           cat > android-app/app/build.gradle <<'EOF'
-          plugins {
-              id 'com.android.application'
-          }
-
+          plugins { id 'com.android.application' }
           android {
               namespace 'com.noorala.noor'
               compileSdk 35
-
               defaultConfig {
                   applicationId 'com.noorala.noor'
                   minSdk 26
                   targetSdk 35
-                  versionCode 2
-                  versionName '1.1'
+                  versionCode 3
+                  versionName '1.2'
               }
           }
           EOF
-
           cat > android-app/app/src/main/AndroidManifest.xml <<'EOF'
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-
-              <uses-permission
-                  android:name="android.permission.INTERNET"/>
-
-              <uses-permission
-                  android:name="android.permission.POST_NOTIFICATIONS"/>
-
+              <uses-permission android:name="android.permission.INTERNET" />
+              <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
               <application
                   android:label="نور على نور"
                   android:usesCleartextTraffic="false"
                   android:theme="@android:style/Theme.Material.Light.NoActionBar">
-
-                  <activity
-                      android:name=".MainActivity"
-                      android:exported="true">
-
+                  <activity android:name=".MainActivity" android:exported="true">
                       <intent-filter>
-                          <action android:name="android.intent.action.MAIN"/>
-                          <category android:name="android.intent.category.LAUNCHER"/>
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
                       </intent-filter>
-
                   </activity>
               </application>
           </manifest>
           EOF
-
           cat > android-app/app/src/main/java/com/noorala/noor/MainActivity.java <<'EOF'
           package com.noorala.noor;
 
@@ -119,6 +83,7 @@ jobs:
           import android.app.Activity;
           import android.app.NotificationChannel;
           import android.app.NotificationManager;
+          import android.content.pm.PackageManager;
           import android.os.Build;
           import android.os.Bundle;
           import android.webkit.WebSettings;
@@ -126,78 +91,48 @@ jobs:
           import android.webkit.WebViewClient;
 
           public class MainActivity extends Activity {
-
               private WebView webView;
+              private static final String CHANNEL_ID = "qiyam_reminders";
 
               @Override
               public void onCreate(Bundle savedInstanceState) {
                   super.onCreate(savedInstanceState);
-
                   createNotificationChannel();
-
-                  if (Build.VERSION.SDK_INT >= 33) {
-                      if (checkSelfPermission(
-                              Manifest.permission.POST_NOTIFICATIONS)
-                              != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                          requestPermissions(
-                              new String[]{Manifest.permission.POST_NOTIFICATIONS},
-                              100
-                          );
-                      }
+                  if (Build.VERSION.SDK_INT >= 33 &&
+                      checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
+                          != PackageManager.PERMISSION_GRANTED) {
+                      requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 100);
                   }
-
                   webView = new WebView(this);
                   webView.setWebViewClient(new WebViewClient());
-
                   WebSettings settings = webView.getSettings();
                   settings.setJavaScriptEnabled(true);
                   settings.setDomStorageEnabled(true);
                   settings.setMediaPlaybackRequiresUserGesture(true);
-
                   setContentView(webView);
-
-                  webView.loadUrl(
-                      "https://sewdeti-gif.github.io/noor-ala-noor/home.html"
-                  );
+                  webView.loadUrl("https://sewdeti-gif.github.io/noor-ala-noor/home.html");
               }
 
               private void createNotificationChannel() {
                   if (Build.VERSION.SDK_INT >= 26) {
-                      NotificationChannel channel =
-                          new NotificationChannel(
-                              "qiyam_reminders",
-                              "تنبيهات قيام الليل",
-                              NotificationManager.IMPORTANCE_HIGH
-                          );
-
-                      channel.setDescription(
-                          "تذكيرات الثلث الأخير من الليل وقيام الليل"
-                      );
+                      NotificationChannel channel = new NotificationChannel(
+                          CHANNEL_ID, "تنبيهات قيام الليل", NotificationManager.IMPORTANCE_HIGH);
+                      channel.setDescription("تذكيرات قيام الليل - إعداد أولي");
                       channel.enableVibration(true);
-
-                      NotificationManager manager =
-                          getSystemService(NotificationManager.class);
-
-                      if (manager != null) {
-                          manager.createNotificationChannel(channel);
-                      }
+                      NotificationManager manager = getSystemService(NotificationManager.class);
+                      if (manager != null) manager.createNotificationChannel(channel);
                   }
               }
 
               @Override
               public void onBackPressed() {
-                  if (webView != null && webView.canGoBack()) {
-                      webView.goBack();
-                  } else {
-                      super.onBackPressed();
-                  }
+                  if (webView != null && webView.canGoBack()) webView.goBack();
+                  else super.onBackPressed();
               }
 
               @Override
               protected void onDestroy() {
-                  if (webView != null) {
-                      webView.destroy();
-                  }
+                  if (webView != null) webView.destroy();
                   super.onDestroy();
               }
           }
@@ -205,8 +140,7 @@ jobs:
 
       - name: Build APK
         working-directory: android-app
-        run: |
-          gradle assembleDebug --no-daemon
+        run: gradle assembleDebug --no-daemon
 
       - name: Save APK
         uses: actions/upload-artifact@v4
