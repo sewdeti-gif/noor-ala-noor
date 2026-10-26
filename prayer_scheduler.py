@@ -97,8 +97,7 @@ def schedule_for_day(day, lat, lon, timezone):
          "دخل الثلث الأخير من الليل، وقت الدعاء والاستغفار والقيام"),
 ("qiyam_1", fajr - timedelta(minutes=60),
          "قيام الليل — الفرقان، الآيات 64 إلى 66، بصوت الشيخ الزين محمد أحمد"),
-
-        ("qiyam_2", fajr - timedelta(minutes=15),
+("qiyam_2", fajr - timedelta(minutes=30),
          "قيام الليل — السجدة، الآيات 16 إلى 18، بصوت الشيخ نورين محمد صديق"),
 
         ("duha_1", datetime(
