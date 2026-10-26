@@ -1,0 +1,25 @@
+name: Android Build Preparation
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download project
+        uses: actions/checkout@v4
+
+      - name: Check Quran application files
+        run: |
+          test -f home.html
+          test -f Yassin.html
+          test -f Feth.html
+          test -f Naba.html
+          test -f Waqiah.html
+          test -f Mulk.html
+          echo "Quran application files are ready."
