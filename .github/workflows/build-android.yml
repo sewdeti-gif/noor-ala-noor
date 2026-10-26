@@ -30,20 +30,15 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Use preinstalled Android SDK
+        run: |
+          echo "Using GitHub runner Android SDK"
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          test -d "$ANDROID_HOME"
 
       - name: Create Android project
         run: |
           mkdir -p android-app/app/src/main/java/com/noorala/noor
-          mkdir -p android-app/app/src/main/assets
-
-          cp home.html android-app/app/src/main/assets/
-          cp Yassin.html android-app/app/src/main/assets/
-          cp Feth.html android-app/app/src/main/assets/
-          cp Naba.html android-app/app/src/main/assets/
-          cp Waqiah.html android-app/app/src/main/assets/
-          cp Mulk.html android-app/app/src/main/assets/
 
           cat > android-app/settings.gradle <<'EOF'
           pluginManagement {
@@ -91,18 +86,24 @@ jobs:
 
           cat > android-app/app/src/main/AndroidManifest.xml <<'EOF'
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-              <uses-permission android:name="android.permission.INTERNET"/>
+
+              <uses-permission
+                  android:name="android.permission.INTERNET"/>
+
               <application
                   android:label="نور على نور"
                   android:usesCleartextTraffic="false"
                   android:theme="@android:style/Theme.Material.Light.NoActionBar">
+
                   <activity
                       android:name=".MainActivity"
                       android:exported="true">
+
                       <intent-filter>
                           <action android:name="android.intent.action.MAIN"/>
                           <category android:name="android.intent.category.LAUNCHER"/>
                       </intent-filter>
+
                   </activity>
               </application>
           </manifest>
@@ -118,6 +119,7 @@ jobs:
           import android.webkit.WebSettings;
 
           public class MainActivity extends Activity {
+
               @Override
               public void onCreate(Bundle savedInstanceState) {
                   super.onCreate(savedInstanceState);
@@ -149,3 +151,4 @@ jobs:
         with:
           name: Noor-Ala-Noor-Android
           path: android-app/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
