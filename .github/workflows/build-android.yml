@@ -1,5 +1,267 @@
 
+name: Build Noor Ala
 name: Build Noor Ala Noor Android APK
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download project
+        uses: actions/checkout@v4
+
+      - name: Check Quran files
+        run: |
+          for file in home.html Yassin.html Feth.html Naba.html Waqiah.html Mulk.html; do
+            test -f "$file"
+          done
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Create Android project
+        run: |
+          mkdir -p android-app/app/src/main/java/com/noorala/noor
+
+          cat > android-app/settings.gradle <<'EOF'
+          pluginManagement {
+              repositories {
+                  google()
+                  mavenCentral()
+                  gradlePluginPortal()
+              }
+          }
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+          rootProject.name = 'NoorAlaNoor'
+          include ':app'
+          EOF
+
+          cat > android-app/build.gradle <<'EOF'
+          plugins {
+              id 'com.android.application' version '8.5.2' apply false
+          }
+          EOF
+
+          cat > android-app/app/build.gradle <<'EOF'
+          plugins {
+              id 'com.android.application'
+          }
+
+          android {
+              namespace 'com.noorala.noor'
+              compileSdk 35
+
+              defaultConfig {
+                  applicationId 'com.noorala.noor'
+                  minSdk 26
+                  targetSdk 35
+                  versionCode 4
+                  versionName '1.3'
+              }
+          }
+          EOF
+
+          cat > android-app/app/src/main/AndroidManifest.xml <<'EOF'
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+              <uses-permission android:name="android.permission.INTERNET" />
+              <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+              <application
+                  android:label="نور على نور"
+                  android:usesCleartextTraffic="false"
+                  android:theme="@android:style/Theme.Material.Light.NoActionBar">
+
+                  <activity
+                      android:name=".MainActivity"
+                      android:exported="true">
+
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
+                      </intent-filter>
+
+                  </activity>
+              </application>
+          </manifest>
+          EOF
+
+          cat > android-app/app/src/main/java/com/noorala/noor/MainActivity.java <<'EOF'
+          package com.noorala.noor;
+
+          import android.Manifest;
+          import android.app.Activity;
+          import android.app.Notification;
+          import android.app.NotificationChannel;
+          import android.app.NotificationManager;
+          import android.content.pm.PackageManager;
+          import android.os.Build;
+          import android.os.Bundle;
+          import android.os.Handler;
+          import android.os.Looper;
+          import android.webkit.WebSettings;
+          import android.webkit.WebView;
+          import android.webkit.WebViewClient;
+
+          public class MainActivity extends Activity {
+
+              private WebView webView;
+              private final Handler handler = new Handler(Looper.getMainLooper());
+              private static final String CHANNEL_ID = "qiyam_reminders";
+              private static final int PERMISSION_REQUEST = 100;
+              private boolean testScheduled = false;
+
+              @Override
+              public void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
+
+                  createNotificationChannel();
+
+                  webView = new WebView(this);
+                  webView.setWebViewClient(new WebViewClient());
+
+                  WebSettings settings = webView.getSettings();
+                  settings.setJavaScriptEnabled(true);
+                  settings.setDomStorageEnabled(true);
+                  settings.setMediaPlaybackRequiresUserGesture(true);
+
+                  setContentView(webView);
+
+                  webView.loadUrl(
+                      "https://sewdeti-gif.github.io/noor-ala-noor/home.html"
+                  );
+
+                  if (Build.VERSION.SDK_INT >= 33 &&
+                      checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
+                          != PackageManager.PERMISSION_GRANTED) {
+                      requestPermissions(
+                          new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                          PERMISSION_REQUEST
+                      );
+                  } else {
+                      scheduleTestNotification();
+                  }
+              }
+
+              private void createNotificationChannel() {
+                  NotificationManager manager =
+                      getSystemService(NotificationManager.class);
+
+                  if (manager == null) return;
+
+                  NotificationChannel channel = new NotificationChannel(
+                      CHANNEL_ID,
+                      "تنبيهات قيام الليل",
+                      NotificationManager.IMPORTANCE_HIGH
+                  );
+
+                  channel.setDescription(
+                      "تنبيهات القرآن وقيام الليل"
+                  );
+                  channel.enableVibration(true);
+
+                  manager.createNotificationChannel(channel);
+              }
+
+              private void scheduleTestNotification() {
+                  if (testScheduled) return;
+                  testScheduled = true;
+
+                  handler.postDelayed(() -> {
+                      showTestNotification();
+                  }, 120000);
+              }
+
+              private void showTestNotification() {
+                  if (Build.VERSION.SDK_INT >= 33 &&
+                      checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
+                          != PackageManager.PERMISSION_GRANTED) {
+                      return;
+                  }
+
+                  NotificationManager manager =
+                      getSystemService(NotificationManager.class);
+
+                  if (manager == null) return;
+
+                  Notification notification =
+                      new Notification.Builder(this, CHANNEL_ID)
+                          .setSmallIcon(android.R.drawable.ic_dialog_info)
+                          .setContentTitle("نور على نور")
+                          .setContentText(
+                              "اختبار التنبيهات: دقائق مع القرآن، سكينة للقلب وزاد للآخرة."
+                          )
+                          .setAutoCancel(true)
+                          .build();
+
+                  manager.notify(1301, notification);
+              }
+
+              @Override
+              public void onRequestPermissionsResult(
+                  int requestCode,
+                  String[] permissions,
+                  int[] grantResults
+              ) {
+                  super.onRequestPermissionsResult(
+                      requestCode, permissions, grantResults
+                  );
+
+                  if (requestCode == PERMISSION_REQUEST &&
+                      grantResults.length > 0 &&
+                      grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                      scheduleTestNotification();
+                  }
+              }
+
+              @Override
+              public void onBackPressed() {
+                  if (webView != null && webView.canGoBack()) {
+                      webView.goBack();
+                  } else {
+                      super.onBackPressed();
+                  }
+              }
+
+              @Override
+              protected void onDestroy() {
+                  handler.removeCallbacksAndMessages(null);
+
+                  if (webView != null) {
+                      webView.destroy();
+                  }
+
+                  super.onDestroy();
+              }
+          }
+          EOF
+
+      - name: Build APK
+        working-directory: android-app
+        run: gradle assembleDebug --no-daemon
+
+      - name: Save APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Noor-Ala-Noor-Android
+          path: android-app/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+  Android APK
 
 on:
   workflow_dispatch:
