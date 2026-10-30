@@ -29,10 +29,11 @@ jobs:
       - name: Install requirements
         run: pip install -r requirements.txt
 
-      - name: Schedule prayer reminders for test users
+      - name: Schedule pilot notifications
         env:
           ONESIGNAL_REST_API_KEY: ${{ secrets.ONESIGNAL_REST_API_KEY }}
           ONESIGNAL_APP_ID: e41737a2-7d31-4a24-8a49-cbfc4e75aff0
+          PILOT_USER_ID: c9796f0b-c6ae-4c13-9514-b11f629ff869
         run: |
           python3 - <<'PY'
           import json
@@ -42,34 +43,92 @@ jobs:
           import urllib.error
           from datetime import datetime, timezone
           from zoneinfo import ZoneInfo
+
           from prayer_scheduler import schedule_for_day
 
-          key = os.environ.get("ONESIGNAL_REST_API_KEY")
-          app_id = os.environ.get("ONESIGNAL_APP_ID")
+          key = os.environ["ONESIGNAL_REST_API_KEY"]
+          app_id = os.environ["ONESIGNAL_APP_ID"]
+          user_id = os.environ["PILOT_USER_ID"]
 
-          if not key or not app_id:
-              raise RuntimeError("Missing OneSignal credentials")
+          def api_request(url, payload=None):
+              headers = {
+                  "Authorization": "Key " + key,
+                  "Accept": "application/json",
+              }
+              method = "GET"
+              data = None
 
-          local_tz = ZoneInfo("Africa/Nouakchott")
+              if payload is not None:
+                  method = "POST"
+                  headers["Content-Type"] = "application/json"
+                  data = json.dumps(
+                      payload, ensure_ascii=False
+                  ).encode("utf-8")
+
+              request = urllib.request.Request(
+                  url,
+                  data=data,
+                  headers=headers,
+                  method=method,
+              )
+
+              try:
+                  with urllib.request.urlopen(
+                      request, timeout=30
+                  ) as response:
+                      return json.load(response)
+              except urllib.error.HTTPError as error:
+                  raise RuntimeError(
+                      f"OneSignal HTTP {error.code}"
+                  ) from error
+
+          user = api_request(
+              "https://api.onesignal.com/apps/"
+              + app_id
+              + "/users/by/onesignal_id/"
+              + user_id
+          )
+
+          properties = user.get("properties") or {}
+          tags = properties.get("tags") or {}
+
+          coords = tags.get("prayer_coords")
+          tz_name = tags.get("prayer_timezone")
+
+          if not coords or not tz_name:
+              raise RuntimeError(
+                  "Pilot subscriber location is missing. "
+                  "No notifications scheduled."
+              )
+
+          lat, lon = map(float, coords.split(","))
+
+          if not (-90 <= lat <= 90):
+              raise ValueError("Invalid latitude")
+          if not (-180 <= lon <= 180):
+              raise ValueError("Invalid longitude")
+
+          local_tz = ZoneInfo(tz_name)
           now = datetime.now(timezone.utc)
           today = now.astimezone(local_tz).date()
 
           events = schedule_for_day(
-              today,
-              18.1138,
-              -15.9438,
-              "Africa/Nouakchott"
+              today, lat, lon, tz_name
           )
 
           expected = 19 if today.weekday() == 4 else 15
-          assert len(events) == expected
+
+          if len(events) != expected:
+              raise RuntimeError(
+                  "Unexpected notification count"
+              )
 
           base_url = (
               "https://sewdeti-gif.github.io/"
               "noor-ala-noor/"
           )
 
-          surah_pages = {
+          pages = {
               "fajr": "Yassin.html",
               "dhuhr": "Feth.html",
               "asr": "Naba.html",
@@ -81,89 +140,71 @@ jobs:
           skipped = 0
 
           for event in events:
-              when = datetime.fromisoformat(event["time"])
-              send_time = when.astimezone(timezone.utc)
+              when = datetime.fromisoformat(
+                  event["time"]
+              ).astimezone(timezone.utc)
 
-              if send_time <= now:
+              if when <= now:
                   skipped += 1
                   continue
 
               event_id = event["id"]
-              page = next(
-                  (
-                      filename
-                      for prefix, filename in surah_pages.items()
-                      if event_id.startswith(prefix + "_")
-                  ),
-                  None
-              )
+              page = None
+
+              for prefix, filename in pages.items():
+                  if event_id.startswith(prefix + "_"):
+                      page = filename
+                      break
 
               unique_id = str(uuid.uuid5(
                   uuid.NAMESPACE_URL,
-                  f"shawayil:{today}:{event_id}:nouakchott"
+                  f"shawayil:{user_id}:{today}:{event_id}"
               ))
 
               payload = {
                   "app_id": app_id,
                   "target_channel": "push",
-                  "included_segments": ["Test Users"],
+                  "include_aliases": {
+                      "onesignal_id": [user_id]
+                  },
                   "headings": {
                       "en": "🌿 شوايل الآخرة"
                   },
                   "contents": {
                       "en": event["message"]
                   },
-                  "url": base_url + page if page else base_url,
-                  "send_after": send_time.strftime(
+                  "url": (
+                      base_url + page
+                      if page else base_url
+                  ),
+                  "send_after": when.strftime(
                       "%Y-%m-%d %H:%M:%S GMT"
                   ),
                   "idempotency_key": unique_id,
-                  "name": f"{today} {event_id}"
+                  "name": f"{today} {event_id}",
               }
 
-              request = urllib.request.Request(
+              result = api_request(
                   "https://api.onesignal.com/notifications",
-                  data=json.dumps(
-                      payload,
-                      ensure_ascii=False
-                  ).encode("utf-8"),
-                  headers={
-                      "Authorization": "Key " + key,
-                      "Content-Type": "application/json"
-                  },
-                  method="POST"
+                  payload,
               )
 
-              try:
-                  with urllib.request.urlopen(
-                      request, timeout=30
-                  ) as response:
-                      result = json.load(response)
-                      if result.get("errors"):
-                          raise RuntimeError(
-                              str(result["errors"])
-                          )
-                      if not result.get("id"):
-                          raise RuntimeError(
-                              "No notification ID returned"
-                          )
-              except urllib.error.HTTPError as error:
-                  details = error.read().decode(
-                      "utf-8", errors="replace"
-                  )
+              if result.get("errors"):
                   raise RuntimeError(
-                      f"OneSignal HTTP {error.code}: {details}"
-                  ) from error
+                      str(result["errors"])
+                  )
+
+              if not result.get("id"):
+                  raise RuntimeError(
+                      "No notification ID returned"
+                  )
 
               scheduled += 1
-              print(
-                  f"Scheduled {event_id} for "
-                  f"{send_time.isoformat()}"
-              )
+              print("Scheduled:", event_id)
 
           print("Date:", today)
-          print("Expected events:", expected)
-          print("Scheduled future events:", scheduled)
-          print("Skipped past events:", skipped)
-          print("Test Users only - Nouakchott")
+          print("Expected:", expected)
+          print("Scheduled:", scheduled)
+          print("Skipped:", skipped)
+          print("Mode: one pilot subscriber only")
           PY
