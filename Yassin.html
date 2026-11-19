@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -5,13 +6,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>سورة يس - نور على نور</title>
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&display=swap" rel="stylesheet">
+
 <style>
-  .controls,
-a[download],
-#playbackStatus {
-  display: none !important;
+* {
+  box-sizing: border-box;
 }
-* { box-sizing: border-box; }
 
 body {
   font-family: Arial, sans-serif;
@@ -31,7 +33,9 @@ body {
   border-radius: 15px;
 }
 
-h1 { color: #5b4636; }
+h1 {
+  color: #5b4636;
+}
 
 .riwaya {
   color: #806044;
@@ -52,12 +56,10 @@ audio {
   display: block;
 }
 
-.controls {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 12px;
+.controls,
+a[download],
+#playbackStatus {
+  display: none !important;
 }
 
 .button {
@@ -73,36 +75,25 @@ audio {
   cursor: pointer;
 }
 
-.controls button {
-  background: #176b43;
-  color: white;
-  border: 0;
-  border-radius: 10px;
-  padding: 10px 14px;
-  font-size: 16px;
-}
-
-.controls button:disabled {
-  opacity: 0.5;
-}
-
-#playbackStatus {
-  font-size: 14px;
-  line-height: 1.7;
-  color: #5b4636;
-}
-
 #quran {
-  font-family: "Traditional Arabic", serif;
+  font-family: "Amiri Quran",
+               "Noto Naskh Arabic",
+               "Traditional Arabic",
+               serif;
   font-size: 25px;
-  line-height: 2.2;
+  line-height: 2.4;
   text-align: justify;
   padding: 12px;
+  direction: rtl;
 }
 
-.ayah { margin: 0 3px; }
+.ayah {
+  margin: 0 3px;
+}
 
-.done { background: #39734b; }
+.done {
+  background: #39734b;
+}
 
 #status {
   background: #f8f5ed;
@@ -113,83 +104,69 @@ audio {
 </head>
 
 <body>
+
 <main class="surah">
 
 <h1>سورة يس</h1>
-<p class="riwaya">رواية ورش عن نافع</p>
+
+<p class="riwaya">
+رواية ورش عن نافع
+</p>
 
 <div class="player">
-  <p>تلاوة الشيخ محمود خليل الحصري — ورش</p>
 
-  <audio
-    id="surahAudio"
-    controls
-    preload="auto"
-  >
-    <source src="./036.mp3" type="audio/mpeg">
-    متصفحك لا يدعم تشغيل الصوت.
-  </audio>
+<p>
+تلاوة الشيخ محمود خليل الحصري — ورش
+</p>
 
-  <div class="controls">
-    <button type="button" onclick="skipAudio(-30)">
-      ⏪ رجوع 30 ثانية
-    </button>
+<audio id="surahAudio" controls preload="auto">
+  <source src="./036.mp3" type="audio/mpeg">
+  متصفحك لا يدعم تشغيل الصوت.
+</audio>
 
-    <button type="button" onclick="skipAudio(30)">
-      تقديم 30 ثانية ⏩
-    </button>
-  </div>
+<p id="playbackStatus"></p>
 
-  <a
-    class="button"
-    href="./036.mp3"
-    download="Yassin-Warsh.mp3"
-  >
-    ⬇ تنزيل التلاوة
-  </a>
-
-  <p id="playbackStatus" aria-live="polite">
-    جارٍ تجهيز مشغّل التلاوة...
-  </p>
 </div>
 
 <h2>المصحف</h2>
-<div id="quran">جارٍ تحميل آيات سورة يس...</div>
 
-<p id="status">لم تُسجَّل القراءة بعد.</p>
+<div id="quran">
+جارٍ تحميل آيات سورة يس...
+</div>
+
+<p id="status">
+لم تُسجَّل القراءة بعد.
+</p>
 
 <button class="button done" onclick="markDone()">
-  ✓ تمّت القراءة
+✓ تمّت القراءة
 </button>
 
 <p>
-  <a class="button" href="home.html">
-    ← الرجوع إلى الورد
-  </a>
+<a class="button" href="home.html">
+← الرجوع إلى الورد
+</a>
 </p>
 
 <p>
-  نور على نور<br>
-  بالقرآن نرتقي، وبالصلاة يطمئن القلب.
+نور على نور<br>
+بالقرآن نرتقي، وبالصلاة يطمئن القلب.
 </p>
 
 </main>
 
 <script>
+
 const readingKey = "yassin_reading_completed";
 const positionKey = "yassin_audio_position";
 
 const audio = document.getElementById("surahAudio");
-const playbackStatus =
-  document.getElementById("playbackStatus");
-
-function setPlaybackStatus(message) {
-  playbackStatus.textContent = message;
-}
 
 function savePosition() {
-  if (Number.isFinite(audio.currentTime) &&
-      audio.currentTime > 0) {
+  if (
+    Number.isFinite(audio.currentTime) &&
+    audio.currentTime > 0
+  ) {
     localStorage.setItem(
       positionKey,
       String(audio.currentTime)
@@ -205,93 +182,80 @@ audio.addEventListener("loadedmetadata", function () {
   if (
     Number.isFinite(saved) &&
     saved > 0 &&
-        Number.isFinite(audio.duration) &&
+    Number.isFinite(audio.duration) &&
     saved < audio.duration - 3
   ) {
     audio.currentTime = saved;
   }
-  setPlaybackStatus("المشغّل جاهز للاستماع.");
 });
 
 audio.addEventListener("timeupdate", savePosition);
 audio.addEventListener("pause", savePosition);
 
-audio.addEventListener("waiting", function () {
-  setPlaybackStatus("جارٍ تحميل التلاوة...");
-});
-
-audio.addEventListener("playing", function () {
-  setPlaybackStatus("التلاوة تعمل الآن.");
-});
-
-audio.addEventListener("stalled", function () {
-  setPlaybackStatus("تأخر تحميل الصوت.");
-});
-
-audio.addEventListener("error", function () {
-  setPlaybackStatus("تعذّر تشغيل التسجيل.");
-});
-
 audio.addEventListener("ended", function () {
   localStorage.removeItem(positionKey);
-  setPlaybackStatus("اكتملت التلاوة، الحمد لله.");
 });
 
-function skipAudio(seconds) {
-  if (!Number.isFinite(audio.duration)) {
-    setPlaybackStatus("انتظري تحميل التسجيل.");
-    return;
-  }
-
-  const target = Math.max(
-    0,
-    Math.min(audio.duration - 0.1, audio.currentTime + seconds)
-  );
-
-  audio.currentTime = target;
-  savePosition();
-}
-
 async function loadQuran() {
+
   const box = document.getElementById("quran");
 
   try {
+
     const response = await fetch(
       "https://api.quranpedia.net/v1/mushafs/4/36"
     );
 
-    if (!response.ok) throw new Error("تعذّر تحميل المصحف");
+    if (!response.ok) {
+      throw new Error("تعذّر تحميل المصحف");
+    }
 
     const ayahs = await response.json();
+
     box.replaceChildren();
 
     ayahs.forEach(ayah => {
+
       const span = document.createElement("span");
+
       span.className = "ayah";
+
       span.textContent =
         ayah.text + " ۝" + ayah.number + " ";
+
       box.appendChild(span);
+
     });
+
   } catch (error) {
+
     box.textContent =
       "تعذّر تحميل نص المصحف. تحققي من اتصال الإنترنت.";
+
   }
 }
 
 function showStatus() {
+
   document.getElementById("status").textContent =
     localStorage.getItem(readingKey) === "yes"
       ? "الحمد لله، سجّلتِ إتمام سورة يس."
       : "لم تُسجَّل القراءة بعد.";
+
 }
 
 function markDone() {
+
   localStorage.setItem(readingKey, "yes");
+
   showStatus();
+
 }
 
 loadQuran();
 showStatus();
+
 </script>
+
 </body>
 </html>
