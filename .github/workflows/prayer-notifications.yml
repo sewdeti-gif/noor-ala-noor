@@ -4,7 +4,7 @@ name: Prayer Notifications
 on:
   workflow_dispatch:
   schedule:
-    - cron: "10 0 * * *"
+    - cron: "17 18 * * *"
 
 permissions:
   contents: read
@@ -41,7 +41,7 @@ jobs:
           import uuid
           import urllib.request
           import urllib.error
-          from datetime import datetime, timezone
+          from datetime import datetime, timedelta, timezone
           from zoneinfo import ZoneInfo
 
           from prayer_scheduler import schedule_for_day
@@ -110,13 +110,19 @@ jobs:
 
           local_tz = ZoneInfo(tz_name)
           now = datetime.now(timezone.utc)
-          today = now.astimezone(local_tz).date()
+          local_now = now.astimezone(local_tz)
+          target_date = local_now.date()
+
+          # An evening run schedules the next local day. If the run
+          # starts after midnight, it can still schedule today's future reminders.
+          if os.environ.get("GITHUB_EVENT_NAME") == "schedule" and local_now.hour >= 12:
+              target_date += timedelta(days=1)
 
           events = schedule_for_day(
-              today, lat, lon, tz_name
+              target_date, lat, lon, tz_name
           )
 
-          expected = 19 if today.weekday() == 4 else 15
+          expected = 19 if target_date.weekday() == 4 else 15
 
           if len(events) != expected:
               raise RuntimeError(
@@ -158,7 +164,7 @@ jobs:
 
               unique_id = str(uuid.uuid5(
                   uuid.NAMESPACE_URL,
-                  f"shawayil:{user_id}:{today}:{event_id}"
+                  f"shawayil:{user_id}:{target_date}:{event_id}"
               ))
 
               payload = {
@@ -181,7 +187,7 @@ jobs:
                       "%Y-%m-%d %H:%M:%S GMT"
                   ),
                   "idempotency_key": unique_id,
-                  "name": f"{today} {event_id}",
+                  "name": f"{target_date} {event_id}",
               }
 
               result = api_request(
@@ -202,7 +208,7 @@ jobs:
               scheduled += 1
               print("Scheduled:", event_id)
 
-          print("Date:", today)
+          print("Date:", target_date)
           print("Expected:", expected)
           print("Scheduled:", scheduled)
           print("Skipped:", skipped)
