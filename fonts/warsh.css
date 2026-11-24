@@ -1,0 +1,12 @@
+/* Font distributed by Quranpedia for its Warsh mushaf. */
+@font-face {
+  font-family: "KFGQPC Warsh";
+  src: url("./UthmanicWarsh-v-3.0.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+}
+
+#quran {
+  font-family: "KFGQPC Warsh", serif;
+}
